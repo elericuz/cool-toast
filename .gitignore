@@ -16,3 +16,12 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local tooling and planning (not part of the package or the demo)
+.claude/
+.env
+.env.*
+openspec/
+PRODUCT.md
+TODO.txt
+.vscode/
