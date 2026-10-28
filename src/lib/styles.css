@@ -295,7 +295,13 @@
 	font-size: 12px;
 	font-weight: 400;
 	font-variant-numeric: tabular-nums;
+	line-height: 1.5;
 	white-space: nowrap;
+}
+
+/* En la cabecera comparte la caja de línea del título */
+[data-cool-toast-timestamp][data-slot="header"] {
+	line-height: 20px;
 }
 
 .cool-toast-body {
@@ -309,13 +315,10 @@
 
 [data-cool-toast-description-row] {
 	display: flex;
-	align-items: flex-start;
+	/* Alinea el timestamp con la línea base de la descripción, sin desfases fijos */
+	align-items: baseline;
 	justify-content: space-between;
 	gap: 10px;
-}
-
-[data-cool-toast-description-row] [data-cool-toast-timestamp] {
-	padding-top: 2px;
 }
 
 [data-cool-toast-description] {

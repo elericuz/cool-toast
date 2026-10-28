@@ -583,3 +583,35 @@ describe('containment rules (STYLE-11)', () => {
 		expect(norm(mirrored.transform)).toBe('scalex(-1)');
 	});
 });
+
+// ---------------------------------------------------------------------------
+// STYLE-12: ritmo vertical del timestamp
+// ---------------------------------------------------------------------------
+describe('timestamp vertical rhythm (STYLE-12)', () => {
+	it('aligns the description row on the baseline', () => {
+		expect(norm(exact('[data-cool-toast-description-row]')['align-items'])).toBe('baseline');
+	});
+
+	it('gives the timestamp the same 1.5 line box as the description', () => {
+		expect(norm(exact('[data-cool-toast-timestamp]')['line-height'])).toBe('1.5');
+	});
+
+	it('has no magic padding-top offset on the timestamp inside the description row', () => {
+		const rule = styleRules.find((r) =>
+			selectorsOf(r).some(
+				(s) => squash(s) === '[data-cool-toast-description-row] [data-cool-toast-timestamp]'
+			)
+		);
+		expect(rule?.declarations['padding-top']).toBeUndefined();
+	});
+
+	it('matches the 20px header height for the header-slot timestamp', () => {
+		const header = exact('[data-cool-toast-timestamp][data-slot="header"]');
+		expect(norm(header['line-height'])).toBe('20px');
+	});
+
+	it('keeps the body top padding at 10px and the progress margin at 14px 0 0', () => {
+		expect(norm(exact('.cool-toast-body')['padding-top'])).toBe('10px');
+		expect(norm(exact('[data-cool-toast-progress]').margin)).toBe('14px00');
+	});
+});
