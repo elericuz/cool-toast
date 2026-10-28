@@ -1,64 +1,47 @@
-/* Página de demostración de Cool-Toast (no se publica). Tailwind solo vive aquí. */
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400..600&family=Geologica:wght@300..800&display=swap");
 
-/* 1. Fuentes: display con carácter + texto refinado + monoespaciada para el código */
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
-
-/* 2. Tailwind */
+/* Página de demostración de Cool-Toast (no se publica). Tailwind solo vive aquí. Solo modo claro. */
 @import "tailwindcss";
 
-/* 3. Hoja de estilos de la librería (la misma que importa un consumidor) */
+/* Hoja de estilos de la librería (la misma que importa un consumidor) */
 @import "./lib/styles.css";
 
-/* 4. Tema: tinta cálida dominante, ascua (naranja) y laguna (turquesa) como acentos */
+/* Tokens: blanco, grises y un azul marino (tono 255) como único color de marca */
 @theme {
-	--font-display: "Bricolage Grotesque", serif;
-	--font-body: "Figtree", sans-serif;
-	--font-code: "JetBrains Mono", monospace;
+	--font-*: initial;
+	--font-display: "Geologica";
+	--font-sans: "Geologica";
+	--font-mono: "Geist Mono", monospace;
 
-	--color-ink-50: #f6f5f3;
-	--color-ink-100: #e9e6e1;
-	--color-ink-200: #d4cec5;
-	--color-ink-300: #b8afa2;
-	--color-ink-400: #9a8f80;
-	--color-ink-500: #7f7465;
-	--color-ink-600: #665d51;
-	--color-ink-700: #524b42;
-	--color-ink-800: #3d3832;
-	--color-ink-900: #26231f;
-	--color-ink-950: #171512;
+	--color-*: initial;
+	--color-white: oklch(1 0 0);
+	--color-brand-50: oklch(0.97 0.006 255);
+	--color-brand-700: oklch(0.28 0.07 255);
+	--color-brand-800: oklch(0.23 0.07 255);
+	--color-ink-900: oklch(0.2 0.015 255);
+	--color-ink-700: oklch(0.38 0.015 255);
+	--color-ink-500: oklch(0.52 0.015 255);
+	--color-line: oklch(0.9 0.008 255);
+	/* Colores de tipo del tema oscuro de la librería (styles.css): legibles sobre el azul marino */
+	--color-type-default: #cccccc;
+	--color-type-success: #66bb6a;
+	--color-type-error: #ef5350;
+	--color-type-warning: #ffb300;
+	--color-type-info: #42a5f5;
 
-	--color-ember-50: #fff6ed;
-	--color-ember-100: #ffead4;
-	--color-ember-200: #ffd1a8;
-	--color-ember-300: #ffb070;
-	--color-ember-400: #ff8a3d;
-	--color-ember-500: #ff6d16;
-	--color-ember-600: #f0520c;
-	--color-ember-700: #c73c0c;
-	--color-ember-800: #9e3112;
-	--color-ember-900: #7f2b12;
-	--color-ember-950: #451207;
+	--radius-*: initial;
+	--radius-pill: 9999px;
+	--radius-panel: 16px;
+	--radius-input: 8px;
 
-	--color-lagoon-50: #effefb;
-	--color-lagoon-100: #c8fff4;
-	--color-lagoon-200: #91fee9;
-	--color-lagoon-300: #52f5dc;
-	--color-lagoon-400: #1ee0c8;
-	--color-lagoon-500: #06c4b0;
-	--color-lagoon-600: #019e90;
-	--color-lagoon-700: #067e74;
-	--color-lagoon-800: #0a645e;
-	--color-lagoon-900: #0e524e;
-	--color-lagoon-950: #003231;
+	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 5. Animaciones de la página */
-@keyframes reveal-up {
+/* Aparición: opacidad + 12px hacia arriba */
+@keyframes rise {
 	from {
 		opacity: 0;
-		transform: translateY(1.25rem);
+		transform: translateY(12px);
 	}
 	to {
 		opacity: 1;
@@ -66,118 +49,140 @@
 	}
 }
 
-@keyframes blob-drift {
-	0%,
-	100% {
-		transform: translate(0, 0) scale(1);
+@layer base {
+	html {
+		@apply scroll-pt-20 bg-white;
 	}
-	50% {
-		transform: translate(2rem, -1.5rem) scale(1.08);
+
+	body {
+		@apply bg-white font-sans text-ink-700 antialiased;
 	}
 }
 
-@keyframes swipe-nudge {
-	0%,
-	100% {
-		transform: translateX(0);
-	}
-	50% {
-		transform: translateX(0.75rem);
-	}
-}
-
-/* 6. Utilidades propias */
 @layer utilities {
-	.page-shell {
-		@apply relative min-h-screen overflow-x-clip bg-ink-950 font-body text-ink-100 antialiased;
+	/* Estructura: todo el contenido vive dentro del contenedor; solo los fondos ocupan todo el ancho */
+	.page-container {
+		@apply mx-auto w-full max-w-6xl px-5 lg:px-8;
 	}
 
-	.grain::before {
-		@apply pointer-events-none absolute inset-0 opacity-20;
-		content: "";
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+	.section-space {
+		@apply py-20 lg:py-28;
 	}
 
-	.section {
-		@apply relative mx-auto w-full max-w-6xl px-6 py-20 lg:px-10;
+	.section-head {
+		@apply mb-10 flex flex-col gap-3;
 	}
 
-	.eyebrow {
-		@apply font-code text-xs font-medium tracking-widest text-lagoon-300 uppercase;
+	/* Navegación */
+	.site-nav {
+		@apply sticky top-0 z-10 border-b border-line bg-white;
 	}
 
+	.site-nav-inner {
+		@apply flex h-16 items-center justify-between gap-4;
+	}
+
+	.wordmark {
+		@apply rounded-input font-display text-lg font-bold whitespace-nowrap text-ink-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700;
+	}
+
+	.nav-link {
+		@apply hidden rounded-input px-2 py-1 text-sm font-medium text-ink-700 transition-colors duration-150 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 sm:inline-flex;
+	}
+
+	.nav-icon-link {
+		@apply inline-flex size-10 items-center justify-center rounded-pill text-ink-700 transition-colors duration-150 hover:bg-brand-50 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700;
+	}
+
+	/* Tipografía */
 	.heading-hero {
-		@apply font-display text-5xl leading-none font-extrabold tracking-tight text-ink-50 sm:text-6xl lg:text-8xl;
+		@apply font-display font-bold text-ink-900;
+		font-size: clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem);
+		line-height: 1.02;
+		letter-spacing: -0.03em;
+		text-wrap: balance;
 	}
 
 	.heading-section {
-		@apply font-display text-3xl font-bold tracking-tight text-ink-50 lg:text-4xl;
+		@apply font-display text-3xl font-bold text-ink-900 lg:text-4xl;
+		letter-spacing: -0.02em;
+		text-wrap: balance;
 	}
 
 	.body-lead {
-		@apply max-w-xl text-lg leading-relaxed text-ink-300;
+		@apply max-w-prose text-lg leading-relaxed text-ink-700;
 	}
 
-	.body-muted {
-		@apply text-sm leading-relaxed text-ink-400;
+	.body-text {
+		@apply max-w-prose text-base leading-relaxed text-ink-700;
 	}
 
-	.accent-word {
-		@apply text-ember-400 italic;
+	.caption {
+		@apply text-sm leading-relaxed text-ink-500;
 	}
 
+	/* Botones */
 	.btn-primary {
-		@apply inline-flex items-center gap-2 rounded-full bg-ember-500 px-6 py-3 font-semibold text-ink-950 shadow-lg shadow-ember-900/40 transition duration-200 hover:-translate-y-0.5 hover:bg-ember-400 focus-visible:ring-2 focus-visible:ring-ember-200 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 focus-visible:outline-none active:translate-y-0;
+		@apply cursor-pointer inline-flex items-center gap-2 rounded-pill bg-brand-700 px-6 py-3 font-semibold whitespace-nowrap text-white transition duration-150 hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 active:scale-98;
 	}
 
-	.btn-ghost {
-		@apply inline-flex items-center gap-2 rounded-full border border-ink-700 px-6 py-3 font-semibold text-ink-100 transition duration-200 hover:border-lagoon-400 hover:text-lagoon-200 focus-visible:ring-2 focus-visible:ring-lagoon-300 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 focus-visible:outline-none;
+	.btn-primary-small {
+		@apply cursor-pointer inline-flex items-center gap-2 rounded-pill bg-brand-700 px-4 py-2 text-sm font-semibold whitespace-nowrap text-white transition duration-150 hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 active:scale-98;
 	}
 
-	.btn-small {
-		@apply inline-flex items-center justify-center gap-2 rounded-full border border-ink-700 bg-ink-900 px-4 py-2 text-sm font-semibold text-ink-100 transition duration-200 hover:border-ember-400 hover:text-ember-200 focus-visible:ring-2 focus-visible:ring-ember-300 focus-visible:outline-none;
+	.btn-secondary {
+		@apply cursor-pointer inline-flex items-center gap-2 rounded-pill border border-line bg-white px-6 py-3 font-semibold whitespace-nowrap text-ink-900 transition duration-150 hover:border-brand-700 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 active:scale-98;
 	}
 
-	.blob {
-		@apply pointer-events-none absolute rounded-full blur-3xl;
-		animation: blob-drift 14s ease-in-out infinite;
+	.btn-secondary-small {
+		@apply cursor-pointer inline-flex items-center gap-2 rounded-pill border border-line bg-white px-4 py-2 text-sm font-semibold whitespace-nowrap text-ink-900 transition duration-150 hover:border-brand-700 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 active:scale-98;
 	}
 
-	.blob-ember {
-		@apply -top-24 -left-24 size-96 bg-ember-600/30;
+	/* Hero partido 7/5: texto a la izquierda, escenario azul marino a la derecha */
+	.hero-grid {
+		@apply grid items-center gap-12 pt-12 pb-8 lg:grid-cols-12 lg:gap-10 lg:pt-16 lg:pb-12;
 	}
 
-	.blob-lagoon {
-		@apply top-40 -right-32 size-80 bg-lagoon-600/25;
-		animation-delay: -6s;
+	.hero-copy {
+		@apply flex flex-col gap-6 lg:col-span-7;
 	}
 
-	.reveal {
-		animation: reveal-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	/* El escenario es el contenedor del Toaster en línea: relativo, recortado y con hueco abajo */
+	.hero-stage {
+		@apply relative flex min-h-136 flex-col gap-6 overflow-hidden rounded-panel bg-brand-700 p-6 pb-60 lg:col-span-5 lg:p-8 lg:pb-60;
 	}
 
-	.reveal-delay-1 {
-		animation-delay: 120ms;
+	.stage-title {
+		@apply font-display text-xl font-semibold text-white;
 	}
 
-	.reveal-delay-2 {
-		animation-delay: 240ms;
+	.stage-types {
+		@apply flex flex-col gap-1.5;
 	}
 
-	.reveal-delay-3 {
-		animation-delay: 360ms;
+	.stage-type {
+		@apply flex w-full cursor-pointer items-center gap-3 rounded-input border border-transparent px-3 py-2.5 text-left transition-colors duration-150 hover:bg-white/8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white aria-pressed:border-white/30 aria-pressed:bg-white/12;
 	}
 
-	.panel {
-		@apply rounded-3xl border border-ink-800 bg-ink-900/70 p-6 shadow-2xl shadow-black/40 backdrop-blur lg:p-8;
+	.stage-type-name {
+		@apply w-20 shrink-0 font-semibold text-white;
+	}
+
+	.stage-type-sample {
+		@apply min-w-0 truncate text-sm text-white/80;
+	}
+
+	/* Playground: un único panel tintado, controles 5/12 y código 7/12 */
+	.tint-panel {
+		@apply grid gap-10 rounded-panel bg-brand-50 p-6 lg:grid-cols-12 lg:gap-12 lg:p-10;
 	}
 
 	.control-group {
-		@apply flex flex-col gap-3 border-0 p-0;
+		@apply flex min-w-0 flex-col gap-3 border-0 p-0;
 	}
 
 	.control-legend {
-		@apply mb-1 font-code text-xs font-medium tracking-wider text-ink-300 uppercase;
+		@apply mb-1 text-sm font-semibold text-ink-900;
 	}
 
 	.segment-list {
@@ -189,93 +194,190 @@
 	}
 
 	.segment-face {
-		@apply inline-flex items-center rounded-full border border-ink-700 bg-ink-950 px-3 py-1.5 text-sm font-medium text-ink-300 transition duration-150 select-none peer-checked:border-ember-400 peer-checked:bg-ember-500 peer-checked:text-ink-950 peer-focus-visible:ring-2 peer-focus-visible:ring-ember-200 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-ink-900 hover:border-ink-500 hover:text-ink-100;
+		@apply cursor-pointer inline-flex items-center rounded-pill border border-line bg-white px-3 py-1.5 text-sm font-medium text-ink-700 transition-colors duration-150 select-none peer-checked:border-brand-700 peer-checked:bg-brand-700 peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-700 hover:border-brand-700;
 	}
 
 	.toggle {
-		@apply flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-ink-800 bg-ink-950 px-4 py-3;
+		@apply flex cursor-pointer items-center justify-between gap-4 py-1;
 	}
 
 	.toggle-label {
-		@apply text-sm font-medium text-ink-100;
-	}
-
-	.toggle-hint {
-		@apply block text-xs text-ink-400;
+		@apply text-sm font-medium text-ink-900;
 	}
 
 	.toggle-track {
-		@apply relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-ink-700 transition duration-200 peer-checked:bg-lagoon-500 peer-focus-visible:ring-2 peer-focus-visible:ring-lagoon-200 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-ink-900;
+		@apply cursor-pointer relative inline-flex h-6 w-11 shrink-0 items-center rounded-pill bg-ink-500 transition-colors duration-150 peer-checked:bg-brand-700 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand-700;
 	}
 
 	.toggle-thumb {
-		@apply absolute left-1 size-4 rounded-full bg-ink-50 shadow transition duration-200;
-	}
-
-	/* Interruptor deshabilitado: cursor y colores atenuados (ink-400 sobre ink-950 mantiene 5.7:1) */
-	.toggle:has(.toggle-input:disabled) {
-		@apply cursor-not-allowed border-ink-900;
-	}
-
-	.toggle:has(.toggle-input:disabled) .toggle-label {
-		@apply text-ink-400;
-	}
-
-	.toggle:has(.toggle-input:disabled) .toggle-hint {
-		@apply text-ink-500;
-	}
-
-	.toggle-input:disabled ~ .toggle-track {
-		@apply bg-ink-800;
-	}
-
-	.toggle-input:disabled ~ .toggle-track .toggle-thumb {
-		@apply bg-ink-500;
+		@apply absolute left-1 size-4 rounded-pill bg-white transition-transform duration-150;
 	}
 
 	.toggle-input:checked ~ .toggle-track .toggle-thumb {
 		@apply translate-x-5;
 	}
 
+	/* Bloques de código: fondo tintado claro, borde fino y texto oscuro */
 	.code-block {
-		@apply overflow-x-auto rounded-2xl border border-ink-800 bg-ink-950 p-4 font-code text-sm leading-relaxed text-lagoon-100;
+		@apply min-w-0 rounded-panel border border-line bg-brand-50;
 	}
 
-	.code-caption {
-		@apply mb-2 font-code text-xs tracking-wider text-ink-400 uppercase;
+	/* Dentro del panel tintado el bloque pasa a blanco para separarse del fondo */
+	.code-block-on-tint {
+		@apply bg-white;
 	}
 
-	.badge {
-		@apply inline-flex items-center gap-2 rounded-full border px-3 py-1 font-code text-xs font-medium;
+	.code-head {
+		@apply flex items-center justify-between gap-3 py-2 pr-2 pl-4;
 	}
 
-	.badge-on {
-		@apply border-lagoon-500 text-lagoon-200;
+	.code-label {
+		@apply font-mono text-sm font-medium text-ink-700;
 	}
 
-	.badge-off {
-		@apply border-ink-700 text-ink-400;
+	.code-copy {
+		@apply cursor-pointer inline-flex size-9 shrink-0 items-center justify-center rounded-input text-ink-700 transition-colors duration-150 hover:bg-white hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-brand-700 active:scale-98;
 	}
 
-	.badge-dot {
-		@apply size-2 rounded-full bg-current;
+	.code-body {
+		@apply overflow-x-auto px-4 pb-4 font-mono text-sm leading-relaxed text-ink-900;
 	}
 
-	.swipe-hand {
-		@apply inline-block;
-		animation: swipe-nudge 1.6s ease-in-out infinite;
+	.inline-code {
+		@apply font-mono text-sm text-ink-900;
 	}
 
+	/* Franja de fotogramas del blob */
+	.blob-band {
+		@apply bg-brand-50;
+	}
+
+	.blob-track {
+		@apply -mx-5 flex snap-x snap-mandatory scroll-px-5 gap-5 overflow-x-auto px-5 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:overflow-visible lg:px-0 lg:pb-0;
+	}
+
+	.blob-frame {
+		@apply flex w-72 shrink-0 snap-start flex-col gap-2 lg:w-auto;
+	}
+
+	/* Azulejo azul marino; el relleno evita que el trazado toque el borde */
+	.blob-tile {
+		@apply mb-2 rounded-panel bg-brand-700 p-5;
+	}
+
+	.blob-figure {
+		@apply block h-auto w-full;
+	}
+
+	.blob-name {
+		@apply font-display text-base font-semibold text-ink-900;
+	}
+
+	.blob-caption {
+		@apply text-sm leading-relaxed text-ink-700;
+	}
+
+	/* Instalación: tres bloques de código en dos columnas en lg */
+	.install-grid {
+		@apply grid content-start items-start gap-5 lg:grid-cols-2;
+	}
+
+	/* Referencia de la API: un solo divisor entre grupos, no entre filas */
+	.api-groups {
+		@apply flex flex-col divide-y divide-line;
+	}
+
+	.api-group {
+		@apply flex flex-col gap-4 py-6 first:pt-0 last:pb-0;
+	}
+
+	.api-group-title {
+		@apply font-display text-lg font-semibold text-ink-900;
+	}
+
+	.api-signature {
+		@apply font-mono text-sm font-medium break-words text-brand-700;
+	}
+
+	/* Sección API: pestañas y listas de definiciones en dos columnas en lg */
+	.api-tablist {
+		@apply flex w-fit max-w-full gap-1 overflow-x-auto rounded-pill border border-line bg-white p-1;
+	}
+
+	.api-tab {
+		@apply cursor-pointer rounded-pill px-4 py-2 text-sm font-semibold whitespace-nowrap text-ink-700 transition-colors duration-150 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 aria-selected:bg-brand-700 aria-selected:text-white;
+	}
+
+	.api-panel {
+		@apply flex flex-col gap-8 rounded-input focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-700;
+	}
+
+	.api-list {
+		@apply grid gap-x-12 gap-y-6 lg:grid-cols-2;
+	}
+
+	.api-entry {
+		@apply flex min-w-0 flex-col gap-1;
+	}
+
+	.api-detail {
+		@apply flex flex-col gap-1 text-sm leading-relaxed text-ink-700;
+	}
+
+	.api-type {
+		@apply font-mono text-sm break-words text-ink-900;
+	}
+
+	.api-default {
+		@apply text-ink-500;
+	}
+
+	/* Enlaces y pie */
 	.link {
-		@apply font-semibold text-lagoon-300 underline decoration-lagoon-700 underline-offset-4 transition hover:text-lagoon-200 hover:decoration-lagoon-300 focus-visible:rounded focus-visible:ring-2 focus-visible:ring-lagoon-300 focus-visible:outline-none;
+		@apply rounded-input font-semibold text-brand-700 underline decoration-line underline-offset-4 transition-colors duration-150 hover:decoration-brand-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700;
+	}
+
+	.site-footer {
+		@apply border-t border-line py-10;
+	}
+
+	/* Pie: una fila en lg (atribución a la izquierda, autoría y enlaces a la derecha); apilado en móvil */
+	.footer-row {
+		@apply flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between;
+	}
+
+	.footer-end {
+		@apply flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-8;
+	}
+
+	.footer-credit {
+		@apply inline-flex items-center gap-1.5 text-sm text-ink-700;
 	}
 }
 
-/* 7. La página respeta prefers-reduced-motion en sus propias animaciones */
-@media (prefers-reduced-motion: reduce) {
-	.reveal,
-	.blob,
-	.swipe-hand {
-		animation: none;
+/*
+ * Movimiento solo cuando el usuario no pidió reducirlo. El estado base es siempre visible:
+ * las clases `is-entering` (hero) e `is-visible` (secciones) se añaden desde JS después del
+ * primer frame, y `backwards` solo aplica el fotograma inicial durante el retraso, nunca al final.
+ */
+@media (prefers-reduced-motion: no-preference) {
+	.is-entering .rise {
+		animation: rise 500ms var(--ease-out-expo) backwards;
+	}
+
+	.is-entering .rise-delay-1 {
+		animation-delay: 60ms;
+	}
+
+	.is-entering .rise-delay-2 {
+		animation-delay: 120ms;
+	}
+
+	.is-entering .rise-delay-3 {
+		animation-delay: 180ms;
+	}
+
+	.reveal-on-scroll.is-visible {
+		animation: rise 500ms var(--ease-out-expo) backwards;
 	}
 }

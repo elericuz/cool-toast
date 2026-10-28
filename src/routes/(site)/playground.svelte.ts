@@ -3,7 +3,6 @@ import {
 	toast,
 	type AnimationPresetName,
 	type Position,
-	type Theme,
 	type ToasterProps,
 	type ToastOptions,
 	type ToastType
@@ -40,20 +39,14 @@ export const presetChoices: Choice<AnimationPresetName>[] = [
 	{ value: 'bouncy', label: 'Bouncy' }
 ];
 
-export const themeChoices: Choice<Theme>[] = [
-	{ value: 'system', label: 'System' },
-	{ value: 'light', label: 'Light' },
-	{ value: 'dark', label: 'Dark' }
-];
-
 export const closeButtonChoices: Choice<CloseButtonChoice>[] = [
 	{ value: 'off', label: 'Off' },
 	{ value: 'top-left', label: 'Top left' },
 	{ value: 'top-right', label: 'Top right' }
 ];
 
-// Textos de ejemplo por tipo de toast
-const samples: Record<ToastType, { title: string; description: string }> = {
+// Textos de ejemplo por tipo de toast (compartidos con el bucle del hero)
+export const samples: Record<ToastType, { title: string; description: string }> = {
 	default: {
 		title: 'Draft saved',
 		description: 'We keep a copy every few seconds while you type.'
@@ -67,6 +60,8 @@ const samples: Record<ToastType, { title: string; description: string }> = {
 	}
 };
 
+export const INSTALL_COMMAND = 'npm i @elericuz/cool-toast';
+
 const BURST_SIZE = 6;
 const BURST_STEP_MS = 140;
 const PROMISE_DELAY_MS = 2200;
@@ -74,12 +69,21 @@ const PROMISE_DELAY_MS = 2200;
 // Escapa comillas simples para los snippets de código generados
 const quote = (text: string) => `'${text.replace(/'/g, "\\'")}'`;
 
+/** Copia texto al portapapeles y avisa con un toast; si falla, explica qué hacer sin detalles técnicos. */
+export async function copyText(text: string, successTitle: string): Promise<void> {
+	try {
+		await navigator.clipboard.writeText(text);
+		toast.success(successTitle);
+	} catch {
+		toast.error('Could not copy', { description: 'Select the text and copy it by hand.' });
+	}
+}
+
 /** Estado del playground de la demo; alimenta al `<Toaster>` y genera los snippets. */
 class Playground {
 	type = $state<ToastType>('success');
 	position = $state<Position>('bottom-right');
 	preset = $state<AnimationPresetName>('snappy');
-	theme = $state<Theme>('system');
 	closeButton = $state<CloseButtonChoice>('off');
 	withDescription = $state(true);
 	withAction = $state(false);
@@ -92,22 +96,20 @@ class Playground {
 	readonly toasterProps: ToasterProps = $derived({
 		position: this.position,
 		preset: this.preset,
-		theme: this.theme,
+		// La demo es solo de modo claro
+		theme: 'light',
 		showProgress: this.showProgress,
 		showTimestamp: this.showTimestamp,
 		closeButton: this.closeButton === 'off' ? false : this.closeButton
 	});
 
 	readonly toasterSnippet = $derived.by(() => {
-		const props = [
-			`position="${this.position}"`,
-			`preset="${this.preset}"`,
-			`theme="${this.theme}"`
-		];
+		const props = [`position="${this.position}"`, `preset="${this.preset}"`, 'theme="light"'];
 		if (this.showProgress) props.push('showProgress');
 		if (!this.showTimestamp) props.push('showTimestamp={false}');
 		if (this.closeButton !== 'off') props.push(`closeButton="${this.closeButton}"`);
-		return `<Toaster ${props.join(' ')} />`;
+		// Una prop por línea para que el snippet nunca se corte horizontalmente
+		return `<Toaster\n${props.map((prop) => `  ${prop}`).join('\n')}\n/>`;
 	});
 
 	readonly toastSnippet = $derived.by(() => {
@@ -127,11 +129,13 @@ class Playground {
   loading: 'Uploading report…',
   success: (data) => \`Uploaded \${data.name}\`,
   error: 'Upload failed',
-  description: { success: () => 'Your file is ready to share.' }
+  description: {
+    success: () => 'Your file is ready to share.'
+  }
 });`;
 
-	private options(): ToastOptions {
-		const { description } = samples[this.type];
+	private options(type: ToastType): ToastOptions {
+		const { description } = samples[type];
 		return {
 			description: this.withDescription ? description : undefined,
 			action: this.withAction
@@ -144,15 +148,30 @@ class Playground {
 		};
 	}
 
-	/** Lanza un toast con la configuración actual. */
-	fire(): void {
-		const { title } = samples[this.type];
-		if (this.type === 'default') toast(title, this.options());
-		else toast[this.type](title, this.options());
+	/** Lanza un toast del tipo indicado (o del elegido en el playground) con la configuración actual. */
+	fire(type: ToastType = this.type): void {
+		const { title } = samples[type];
+		const options = this.options(type);
+		if (type === 'default') toast(title, options);
+		else toast[type](title, options);
+	}
+
+	/** Toast de presentación del hero: cuerpo, acción con confirmación y barra de progreso. */
+	showcase(): void {
+		toast.success('Payment received', {
+			description: 'A receipt is on its way.',
+			action: { label: 'Undo', onClick: () => {}, successLabel: 'Restored' },
+			showProgress: true
+		});
+	}
+
+	/** Copia el comando de instalación y confirma con un toast. */
+	copyInstall(): Promise<void> {
+		return copyText(INSTALL_COMMAND, 'Install command copied');
 	}
 
 	/** Simula una subida que termina bien o mal tras unos segundos. */
-	firePromise(outcome: 'resolve' | 'reject'): void {
+	promise(outcome: 'resolve' | 'reject'): void {
 		const upload = new Promise<{ name: string }>((resolve, reject) => {
 			setTimeout(() => {
 				if (outcome === 'resolve') resolve({ name: 'report.pdf' });
@@ -171,7 +190,7 @@ class Playground {
 	}
 
 	/** Lanza varios toasts seguidos para ver la cola en acción. */
-	fireBurst(): void {
+	burst(): void {
 		const types: ToastType[] = ['default', 'success', 'info', 'warning', 'error', 'success'];
 		for (let index = 0; index < BURST_SIZE; index += 1) {
 			setTimeout(() => {
