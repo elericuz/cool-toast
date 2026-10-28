@@ -476,11 +476,11 @@ describe('premium density values (STYLE-9)', () => {
 		expect(norm(exact('[data-cool-toast-timestamp]')['font-size'])).toBe('12px');
 	});
 
-	it('description uses the size variable with line-height 1.5; body adds 10px on top', () => {
+	it('description uses the size variable with line-height 1.5; body adds 20px on top', () => {
 		const description = exact('[data-cool-toast-description]');
 		expect(norm(description['font-size'])).toBe('var(--cool-toast-description-size)');
 		expect(norm(description['line-height'])).toBe('1.5');
-		expect(norm(exact('.cool-toast-body')['padding-top'])).toBe('10px');
+		expect(norm(exact('.cool-toast-body')['padding-top'])).toBe('20px');
 	});
 
 	it('action button is 12px 20px, 14px, weight 600 and fully rounded', () => {
@@ -610,8 +610,21 @@ describe('timestamp vertical rhythm (STYLE-12)', () => {
 		expect(norm(header['line-height'])).toBe('20px');
 	});
 
-	it('keeps the body top padding at 10px and the progress margin at 14px 0 0', () => {
-		expect(norm(exact('.cool-toast-body')['padding-top'])).toBe('10px');
+	it('keeps the progress margin at 14px 0 0', () => {
 		expect(norm(exact('[data-cool-toast-progress]').margin)).toBe('14px00');
+	});
+});
+
+// ---------------------------------------------------------------------------
+// STYLE-13: el body siempre arranca debajo de la píldora
+// ---------------------------------------------------------------------------
+describe('body clears the pill (STYLE-13)', () => {
+	it('declares padding-top: 20px on .cool-toast-body', () => {
+		expect(norm(exact('.cool-toast-body')['padding-top'])).toBe('20px');
+	});
+
+	it('starts the body 8px below the pill bottom: content 12 + header 20 + body padding', () => {
+		const padding = parseInt(exact('.cool-toast-body')['padding-top'] ?? '0', 10);
+		expect(12 + 20 + padding).toBe(PILL_HEIGHT + 8);
 	});
 });

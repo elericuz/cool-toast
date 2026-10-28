@@ -304,8 +304,13 @@
 	line-height: 20px;
 }
 
+/*
+ * El cuerpo despeja la píldora: 12 (padding superior del contenido) + 20 (alto del header)
+ * + 20 (este padding-top) = 52 = PILL_HEIGHT + 8. Así el cuerpo empieza 8px por debajo del
+ * borde inferior de la píldora y la primera fila nunca toca el borde ni el arco superior del cuerpo.
+ */
 .cool-toast-body {
-	padding-top: 10px;
+	padding-top: 20px;
 }
 
 /* Cuerpo en plena salida: ya no recibe el puntero */
