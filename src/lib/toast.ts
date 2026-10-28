@@ -35,22 +35,44 @@ function promise<T>(promise: Promise<T>, data: PromiseData<T>): string {
 		options: { ...rest, description: description?.loading }
 	}) as string;
 
-	promise.then(
-		(value) =>
-			store.settle(id, 'success', {
-				title: resolveValue(success, value),
-				description:
-					description?.success === undefined ? undefined : resolveValue(description.success, value),
-				action: action?.success
-			}),
-		(reason: unknown) =>
-			store.settle(id, 'error', {
-				title: resolveValue(error, reason),
-				description:
-					description?.error === undefined ? undefined : resolveValue(description.error, reason),
-				action: action?.error
-			})
-	);
+	// SEC-1: si un resolver o la liquidación lanzan, el toast se descarta y el error se reporta una
+	// sola vez; nunca queda un rechazo sin manejar
+	const settleSafely = (run: () => void) => {
+		try {
+			run();
+		} catch (failure) {
+			console.error(failure);
+			store.dismiss(id);
+		}
+	};
+
+	promise
+		.then(
+			(value) =>
+				settleSafely(() =>
+					store.settle(id, 'success', {
+						title: resolveValue(success, value),
+						description:
+							description?.success === undefined
+								? undefined
+								: resolveValue(description.success, value),
+						action: action?.success
+					})
+				),
+			(reason: unknown) =>
+				settleSafely(() =>
+					store.settle(id, 'error', {
+						title: resolveValue(error, reason),
+						description:
+							description?.error === undefined
+								? undefined
+								: resolveValue(description.error, reason),
+						action: action?.error
+					})
+				)
+		)
+		// Red final: si el propio descarte fallara, se reporta en lugar de rechazar la promesa derivada
+		.catch((failure: unknown) => console.error(failure));
 	return id;
 }
 

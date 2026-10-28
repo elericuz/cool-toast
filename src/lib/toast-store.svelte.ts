@@ -56,7 +56,8 @@ export type Politeness = 'polite' | 'assertive';
 
 const defaultConfig = (): ToasterConfig => ({
 	visibleToasts: 3,
-	maxQueue: Infinity,
+	// SEC-2: cola acotada por defecto; `Infinity` sigue aceptándose de forma explícita
+	maxQueue: 100,
 	queueOverflow: 'drop-oldest'
 });
 

@@ -25,7 +25,7 @@
 		offset = '24px',
 		duration,
 		visibleToasts = 3,
-		maxQueue = Infinity,
+		maxQueue = 100,
 		queueOverflow = 'drop-oldest',
 		closeButton = false,
 		closeOnEscape = true,

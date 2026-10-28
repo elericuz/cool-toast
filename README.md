@@ -88,7 +88,7 @@ toast.error('Upload failed', { action: { label: 'Retry', onClick: retry } });
 | `offset`         | `string`                               | `'24px'`                          | Distance from the viewport edge (any CSS length).                                                       |
 | `duration`       | `number`                               | `4000`                            | Lifetime of compact toasts, in ms. `Infinity` disables auto close.                                      |
 | `visibleToasts`  | `number`                               | `3`                               | Maximum toasts on screen; the rest wait in a FIFO queue.                                                |
-| `maxQueue`       | `number`                               | `Infinity`                        | Maximum queued toasts.                                                                                  |
+| `maxQueue`       | `number`                               | `100`                             | Maximum queued toasts. Pass `Infinity` explicitly for an unbounded queue.                               |
 | `queueOverflow`  | `'drop-oldest' \| 'drop-newest'`       | `'drop-oldest'`                   | What to drop when the queue is full.                                                                    |
 | `closeButton`    | `boolean \| 'top-left' \| 'top-right'` | `false`                           | Shows a close button; `true` means `'top-left'`. Hidden while a promise is loading.                     |
 | `closeOnEscape`  | `boolean`                              | `true`                            | `Escape` dismisses the newest toast.                                                                    |
@@ -255,6 +255,18 @@ be set with `fillColor`, `borderColor` and `borderWidth`, and extra classes with
 
 `--cool-toast-progress-duration` is set inline on each progress bar by the library (the visible time of the toast);
 treat it as read-only.
+
+### Security notes
+
+- `fillColor`, `borderColor`, `offset`, `gap`, `classes` and `labels` are trusted values: the library writes them
+  into element and SVG attributes, inline styles, CSS custom properties and class names without sanitising them. Set them from
+  your own code or configuration; never pass end-user input (form fields, URL parameters, stored user content) to
+  them.
+- The queue is bounded by default: `maxQueue` is `100`, and `queueOverflow` (`'drop-oldest'` by default) decides
+  which toast is dropped when it is full. Pass `maxQueue={Infinity}` only if your app limits how many toasts it
+  fires.
+- The library writes inline `style` attributes on every animation frame. If your app sends a Content Security
+  Policy, `style-src` must allow `'unsafe-inline'`.
 
 ### Density and layout
 

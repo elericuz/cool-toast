@@ -110,6 +110,7 @@ export interface ToasterProps {
 	offset?: string;
 	duration?: number;
 	visibleToasts?: number;
+	/** Máximo de toasts en cola. Por defecto `100`; `Infinity` permite una cola sin límite. */
 	maxQueue?: number;
 	queueOverflow?: 'drop-oldest' | 'drop-newest';
 	closeButton?: boolean | 'top-left' | 'top-right';
