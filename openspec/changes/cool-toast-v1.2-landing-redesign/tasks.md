@@ -16,3 +16,4 @@
 - [x] T9 Footer "Made with ♥ by elericuz" — worker-web
 - [x] T10 README.md regenerated with the readme-creator structure (English) — worker-web; worker-qa reviews
 - [x] T11 Final QA: DEMO-1..18 + TOASTER-1..6 + full test suite — worker-qa
+- [x] T12 API examples per tab (DEMO-25) — worker-web; worker-qa static check

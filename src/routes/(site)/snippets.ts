@@ -32,8 +32,16 @@ export interface ApiEntry {
 	description: string;
 }
 
+/** Ejemplo de código que acompaña a una pestaña o a un grupo de la referencia. */
+export interface ApiExample {
+	label: string;
+	lang: 'svelte' | 'ts' | 'css' | 'bash';
+	code: string;
+}
+
 export interface ApiGroup {
 	title: string;
+	example?: ApiExample;
 	entries: ApiEntry[];
 }
 
@@ -41,17 +49,186 @@ export interface ApiTab {
 	id: string;
 	label: string;
 	intro: string;
+	example?: ApiExample;
 	groups: ApiGroup[];
 }
+
+// --- Ejemplos de la referencia de la API ---
+// Cada ejemplo usa solo tipos y exportaciones reales de src/lib (types.ts, toast.ts, index.ts)
+
+const toasterLayoutExample = `<script lang="ts">
+  import '@elericuz/cool-toast/styles.css';
+  import { Toaster } from '@elericuz/cool-toast';
+
+  let { children } = $props();
+</script>
+
+<Toaster position="top-center" theme="light" closeButton="top-right" />
+{@render children()}`;
+
+const scopeExample = `<script lang="ts">
+  import { Toaster, toast } from '@elericuz/cool-toast';
+</script>
+
+<!-- App-wide toaster -->
+<Toaster />
+
+<!-- Inline toaster: fills its nearest positioned ancestor -->
+<div style="position: relative; min-height: 320px;">
+  <Toaster id="preview" inline position="bottom-center" visibleToasts={1} />
+</div>
+
+<button onclick={() => toast('Saved', { toasterId: 'preview' })}>Preview</button>`;
+
+const interactionExample = `<Toaster
+  closeButton="top-right"
+  closeOnEscape={false}
+  swipeToDismiss={false}
+  labels={{ close: 'Dismiss notification' }}
+/>`;
+
+const toastCreateExample = `import { toast } from '@elericuz/cool-toast';
+
+toast('Draft saved');
+
+toast.success('Invoice sent', {
+  description: 'The client gets it in a minute.',
+  action: {
+    label: 'Undo',
+    onClick: () => cancelInvoice(),
+    successLabel: 'Cancelled'
+  }
+});`;
+
+const toastChangeExample = `const id = toast('Uploading');
+
+toast.update(id, { title: 'Done', type: 'success' });
+toast.dismiss(id);
+
+// Every error and warning toast
+toast.dismiss({ type: ['error', 'warning'] });
+
+// Every toast and the queue
+toast.dismiss();`;
+
+const toastPromiseExample = `declare function upload(file: File): Promise<{ name: string; size: number }>;
+
+toast.promise(upload(file), {
+  loading: 'Uploading',
+  success: (data) => \`\${data.name} uploaded\`,
+  error: 'Upload failed',
+  description: {
+    loading: 'Keep this tab open.',
+    success: (data) => \`\${data.size} bytes stored.\`,
+    error: 'Check your connection and try again.'
+  }
+});`;
+
+const optionsExample = `toast('Storage almost full', {
+  duration: 8000,
+  showProgress: true,
+  showTimestamp: true,
+  fillColor: '#111827',
+  borderColor: '#f59e0b'
+});`;
+
+const snippetOptionsExample = `<script lang="ts">
+  import { toast } from '@elericuz/cool-toast';
+</script>
+
+{#snippet icon()}
+  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+    <circle cx="8" cy="8" r="6" fill="currentColor" />
+  </svg>
+{/snippet}
+
+{#snippet details()}
+  <p>Synced <strong>3 files</strong> to the cloud.</p>
+{/snippet}
+
+<button onclick={() => toast.success('Synced', { icon, description: details })}>
+  Sync
+</button>`;
+
+const timingExample = `toast('Report ready', {
+  description: 'Open it from Downloads.',
+  timing: { displayDuration: 10000 },
+  onAutoClose: (id) => console.log('Closed by the timer', id),
+  onDismiss: (id) => console.log('Dismissed', id)
+});`;
+
+const classesExample = `toast.error('Payment failed', {
+  description: 'Your card was declined.',
+  action: { label: 'Retry', onClick: () => retryPayment() },
+  borderColor: '#e53935',
+  borderWidth: 2,
+  classes: {
+    title: 'payment-title',
+    description: 'payment-description',
+    actionButton: 'payment-retry'
+  }
+});`;
+
+const motionExample = `import { animationPresets, toast } from '@elericuz/cool-toast';
+
+toast('Snappy', { preset: 'snappy' });
+toast('No springs', { spring: false });
+toast('Extra bouncy', { ...animationPresets.bouncy, bounce: 0.8 });`;
+
+const themingExample = `[data-cool-toaster] {
+  --cool-toast-fill: #f8fafc;
+  --cool-toast-border-color: #e2e8f0;
+  --cool-toast-border-width: 1;
+  --cool-toast-description-color: #334155;
+  --cool-toast-success-color: #16a34a;
+  --cool-toast-radius-body: 20px;
+}`;
+
+const themeExample = `<Toaster theme="dark" />
+
+<style>
+  :global([data-cool-toaster][data-theme='dark']) {
+    --cool-toast-fill: #111827;
+    --cool-toast-description-color: #d1d5db;
+  }
+</style>`;
+
+const toastTypesExample = `toast.error('Payment failed');
+toast.warning('Storage almost full');
+
+// The same id replaces the toast in place instead of stacking a new one
+toast.info('New version available', { id: 'update-banner' });`;
+
+const presetsExample = `import { animationPresets, toast } from '@elericuz/cool-toast';
+
+toast('Bouncy', { ...animationPresets.bouncy });`;
+
+const radiusExample = `[data-cool-toaster] {
+  --cool-toast-radius-body: 12px;
+}`;
+
+const shadowExample = `[data-cool-toaster] {
+  --cool-toast-shadow: drop-shadow(0 4px 12px rgb(0 0 0 / 0.15));
+}`;
+
+const densityExample = `[data-cool-toaster] {
+  --cool-toast-pill-padding: 12px 14px;
+  --cool-toast-body-padding: 12px 14px 14px;
+  --cool-toast-title-size: 12px;
+  --cool-toast-description-size: 13px;
+  --cool-toast-font: 'Inter', sans-serif;
+}`;
 
 export const apiTabs: ApiTab[] = [
 	{
 		id: 'toaster',
 		label: 'Toaster',
 		intro: 'Props of the <Toaster> component. Render one in your root layout.',
+		example: { label: '+layout.svelte', lang: 'svelte', code: toasterLayoutExample },
 		groups: [
 			{
 				title: 'Scope',
+				example: { label: 'Scoped toasters', lang: 'svelte', code: scopeExample },
 				entries: [
 					{
 						name: 'id',
@@ -71,6 +248,11 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Placement',
+				example: {
+					label: 'Placement',
+					lang: 'svelte',
+					code: '<Toaster position="bottom-left" gap={10} offset="32px" dir="rtl" />'
+				},
 				entries: [
 					{
 						name: 'position',
@@ -107,6 +289,11 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Queue and timing',
+				example: {
+					label: 'Queue and timing',
+					lang: 'svelte',
+					code: '<Toaster duration={6000} visibleToasts={5} maxQueue={20} queueOverflow="drop-newest" />'
+				},
 				entries: [
 					{
 						name: 'duration',
@@ -136,6 +323,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Interaction',
+				example: { label: 'Interaction', lang: 'svelte', code: interactionExample },
 				entries: [
 					{
 						name: 'closeButton',
@@ -166,6 +354,11 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Motion and display',
+				example: {
+					label: 'Motion and display',
+					lang: 'svelte',
+					code: '<Toaster preset="bouncy" spring bounce={0.5} showProgress showTimestamp={false} />'
+				},
 				entries: [
 					{
 						name: 'preset',
@@ -205,9 +398,11 @@ export const apiTabs: ApiTab[] = [
 		id: 'toast',
 		label: 'toast',
 		intro: 'Every function returns the toast id, generated or the id you passed.',
+		example: { label: 'Basic usage', lang: 'ts', code: toastCreateExample },
 		groups: [
 			{
 				title: 'Create',
+				example: { label: 'Types and custom id', lang: 'ts', code: toastTypesExample },
 				entries: [
 					{
 						name: 'toast(title: string, options?: ToastOptions): string | number',
@@ -234,6 +429,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Change and dismiss',
+				example: { label: 'Update and dismiss', lang: 'ts', code: toastChangeExample },
 				entries: [
 					{
 						name: 'toast.promise<T>(promise: Promise<T>, data: PromiseData<T>): string',
@@ -254,6 +450,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'PromiseData<T>',
+				example: { label: 'toast.promise', lang: 'ts', code: toastPromiseExample },
 				entries: [
 					{
 						name: 'loading',
@@ -294,9 +491,15 @@ export const apiTabs: ApiTab[] = [
 		label: 'Options',
 		intro:
 			'ToastOptions, the second argument of every toast call. An option that shares its name with a Toaster prop overrides it for that toast.',
+		example: { label: 'Per-toast options', lang: 'ts', code: optionsExample },
 		groups: [
 			{
 				title: 'Content',
+				example: {
+					label: 'Snippets as icon and description',
+					lang: 'svelte',
+					code: snippetOptionsExample
+				},
 				entries: [
 					{
 						name: 'description',
@@ -328,6 +531,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Timing and callbacks',
+				example: { label: 'timing and callbacks', lang: 'ts', code: timingExample },
 				entries: [
 					{
 						name: 'duration',
@@ -353,6 +557,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Appearance',
+				example: { label: 'classes', lang: 'ts', code: classesExample },
 				entries: [
 					{
 						name: 'classes',
@@ -384,6 +589,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Motion',
+				example: { label: 'preset, spring and bounce', lang: 'ts', code: motionExample },
 				entries: [
 					{
 						name: 'preset',
@@ -404,6 +610,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'animationPresets',
+				example: { label: 'animationPresets', lang: 'ts', code: presetsExample },
 				entries: [
 					{
 						name: 'smooth',
@@ -434,9 +641,11 @@ export const apiTabs: ApiTab[] = [
 		label: 'Theming',
 		intro:
 			'CSS custom properties, set on [data-cool-toaster]. Dark values apply under [data-theme="dark"].',
+		example: { label: 'app.css', lang: 'css', code: themingExample },
 		groups: [
 			{
 				title: 'Colours',
+				example: { label: 'Light and dark', lang: 'svelte', code: themeExample },
 				entries: [
 					{
 						name: '--cool-toast-fill',
@@ -466,6 +675,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Density',
+				example: { label: 'Density', lang: 'css', code: densityExample },
 				entries: [
 					{
 						name: '--cool-toast-pill-padding, --cool-toast-body-padding',
@@ -483,6 +693,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Radius',
+				example: { label: 'Radius', lang: 'css', code: radiusExample },
 				entries: [
 					{
 						name: '--cool-toast-radius-body',
@@ -492,6 +703,7 @@ export const apiTabs: ApiTab[] = [
 			},
 			{
 				title: 'Shadow',
+				example: { label: 'Shadow', lang: 'css', code: shadowExample },
 				entries: [
 					{
 						name: '--cool-toast-shadow',

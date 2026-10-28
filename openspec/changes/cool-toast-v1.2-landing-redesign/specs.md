@@ -80,3 +80,6 @@ Demo-only requirements (DEMO-*). Verified by worker-qa statically (grep + read) 
   library and its demo were developed with AI assistance (Claude Code) under the author's direction and review.
 - DEMO-24: Every clickable control in the demo (buttons, tabs, segmented pills, switches, copy buttons) renders with
   `cursor: pointer` (Tailwind `cursor-pointer` in the shared utilities).
+- DEMO-25: Every API tab (Toaster, toast, Options, Theming) opens with at least one real, copyable code example
+  (`CodeBlock`) that uses the entries documented in that tab, and each group inside a tab has a one-line example
+  where the usage is not obvious (scoped toasters, promise, update/dismiss, custom colours via CSS variables).

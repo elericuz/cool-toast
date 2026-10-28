@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { revealOnScroll } from '../reveal';
 	import { apiTabs } from '../snippets';
+	import CodeBlock from './CodeBlock.svelte';
 
 	// Pestaña activa (patrón WAI-ARIA Tabs con activación automática)
 	let selected = $state(apiTabs[0].id);
@@ -69,10 +70,22 @@
 					hidden={selected !== tab.id}
 				>
 					<p class="body-text">{tab.intro}</p>
+					<!-- Ejemplo general de la pestaña, a todo el ancho bajo la introducción -->
+					{#if tab.example}
+						<CodeBlock code={tab.example.code} lang={tab.example.lang} label={tab.example.label} />
+					{/if}
 					<div class="api-groups">
 						{#each tab.groups as group (group.title)}
 							<div class="api-group">
 								<h3 class="api-group-title">{group.title}</h3>
+								<!-- Ejemplo del grupo antes de sus entradas -->
+								{#if group.example}
+									<CodeBlock
+										code={group.example.code}
+										lang={group.example.lang}
+										label={group.example.label}
+									/>
+								{/if}
 								<dl class="api-list">
 									{#each group.entries as entry (entry.name)}
 										<div class="api-entry">

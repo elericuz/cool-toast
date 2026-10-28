@@ -4,7 +4,7 @@
 
 	interface Props {
 		code: string;
-		lang: 'bash' | 'svelte' | 'ts';
+		lang: 'bash' | 'svelte' | 'ts' | 'css';
 		label?: string;
 		/** Variante blanca para bloques dentro del panel tintado */
 		onTint?: boolean;
