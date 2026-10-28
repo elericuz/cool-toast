@@ -73,7 +73,7 @@ function matcherFor(idOrFilter?: ToastId | DismissFilter): (record: ToastRecord)
 	return (record) => record.id === idOrFilter;
 }
 
-class ToastStore {
+export class ToastStore {
 	/** Toasts visibles (`active` o `exiting`) en orden de creación. */
 	active = $state<ToastRecord[]>([]);
 	/** Toasts en espera (`queued`), FIFO. */
@@ -189,6 +189,11 @@ class ToastStore {
 		record.action = content.action;
 	}
 
+	/** Indica si el toast `id` está visible o en cola en este store. */
+	has(id: ToastId): boolean {
+		return this.find(id) !== undefined;
+	}
+
 	private find(id: ToastId): ToastRecord | undefined {
 		return (
 			this.active.find((record) => record.id === id) ??
@@ -217,15 +222,36 @@ class ToastStore {
 	}
 }
 
-// Singleton perezoso: no se crea ningún $state hasta el primer uso (SSR-safe al importar)
-let store: ToastStore | null = null;
+/** Id del Toaster y del store que se usan cuando no se indica ninguno. */
+export const DEFAULT_TOASTER_ID = 'default';
 
-export function getStore(): ToastStore {
-	store ??= new ToastStore();
+// Registro perezoso de stores por id de Toaster: no se crea ningún $state hasta el primer uso
+// (SSR-safe al importar). Cada Toaster y cada `toasterId` comparten el store de su id.
+// Map plano a propósito: el registro no es reactivo (lo reactivo es cada store) y un SvelteMap
+// fallaría con state_unsafe_mutation al crear un store dentro del $derived del Toaster.
+// eslint-disable-next-line svelte/prefer-svelte-reactivity
+const stores = new Map<string, ToastStore>();
+
+export function getStore(id: string = DEFAULT_TOASTER_ID): ToastStore {
+	let store = stores.get(id);
+	if (!store) {
+		store = new ToastStore();
+		stores.set(id, store);
+	}
 	return store;
 }
 
-/** Solo para tests: descarta el store para empezar cada caso desde cero. */
+/** Todos los stores creados hasta ahora (para operaciones que afectan a todos los Toasters). */
+export function allStores(): ToastStore[] {
+	return [...stores.values()];
+}
+
+/** Store que contiene el toast `id`, visible o en cola; `undefined` si ninguno lo tiene. */
+export function findStoreOf(id: ToastId): ToastStore | undefined {
+	return allStores().find((store) => store.has(id));
+}
+
+/** Solo para tests: descarta todos los stores para empezar cada caso desde cero. */
 export function __resetToastStoreForTests(): void {
-	store = null;
+	stores.clear();
 }

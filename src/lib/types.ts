@@ -54,6 +54,8 @@ export interface ToastOptions {
 	showTimestamp?: boolean;
 	onDismiss?: (id: string | number) => void;
 	onAutoClose?: (id: string | number) => void;
+	/** Id del `<Toaster>` que muestra el toast. Por defecto `'default'`. */
+	toasterId?: string;
 }
 
 export interface ToastUpdateOptions {
@@ -89,6 +91,8 @@ export interface PromiseData<T> {
 	showTimestamp?: boolean;
 	onDismiss?: (id: string | number) => void;
 	onAutoClose?: (id: string | number) => void;
+	/** Id del `<Toaster>` que muestra el toast. Por defecto `'default'`. */
+	toasterId?: string;
 }
 
 export interface DismissFilter {
@@ -96,6 +100,10 @@ export interface DismissFilter {
 }
 
 export interface ToasterProps {
+	/** Identifica el Toaster; los toasts con el mismo `toasterId` se muestran aquí. Por defecto `'default'`. */
+	id?: string;
+	/** Se posiciona dentro de su ancestro posicionado en vez de en la ventana. Por defecto `false`. */
+	inline?: boolean;
 	position?: Position;
 	theme?: Theme;
 	gap?: number;

@@ -628,3 +628,20 @@ describe('body clears the pill (STYLE-13)', () => {
 		expect(12 + 20 + padding).toBe(PILL_HEIGHT + 8);
 	});
 });
+
+// ---------------------------------------------------------------------------
+// TOASTER-4: toaster en línea dentro de su ancestro posicionado
+// ---------------------------------------------------------------------------
+describe('TOASTER-4 inline', () => {
+	it('positions the inline root absolute, filling its ancestor, without capturing pointer events', () => {
+		const inline = exact('[data-cool-toaster][data-inline="true"]');
+		expect(norm(inline.position)).toBe('absolute');
+		expect(norm(inline.inset)).toBe('0');
+		expect(norm(inline['pointer-events'])).toBe('none');
+	});
+
+	it('keeps pointer-events: auto on the list of an inline root', () => {
+		const list = exact('[data-cool-toaster][data-inline="true"] [data-cool-toast-list]');
+		expect(norm(list['pointer-events'])).toBe('auto');
+	});
+});

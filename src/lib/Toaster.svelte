@@ -10,13 +10,15 @@
 	import { swipe } from './swipe';
 	import { createThemeResolver } from './theme.svelte';
 	import Toast from './Toast.svelte';
-	import { getStore, type ToastRecord } from './toast-store.svelte';
+	import { DEFAULT_TOASTER_ID, getStore, type ToastRecord } from './toast-store.svelte';
 	import { ToastView } from './toast-view.svelte';
 	import type { ToasterProps } from './types';
 
 	// bounce, spring, duration, showProgress y showTimestamp quedan `undefined` si no se pasan,
 	// para que el preset del Toaster pueda aplicarse (resolveOptions pone los valores por defecto)
 	let {
+		id = DEFAULT_TOASTER_ID,
+		inline = false,
 		position = 'bottom-right',
 		theme = 'system',
 		gap = 14,
@@ -37,7 +39,8 @@
 		labels
 	}: ToasterProps = $props();
 
-	const store = getStore();
+	// Cada Toaster usa el store de su id: solo pinta, limita y anuncia sus propios toasts
+	const store = $derived(getStore(id));
 	const resolveTheme = createThemeResolver();
 	const reducedMotion = createReducedMotion();
 	const exitMs = $derived(reducedMotion.current ? REDUCED_MOTION_MS : FADE_MS);
@@ -69,8 +72,10 @@
 			dir,
 			labels
 		};
+		// El store se lee fuera de untrack: si cambia el id, la config se registra en el nuevo store.
 		// untrack: el efecto depende solo de las props, no de la cola que setConfig recorre
-		untrack(() => store.setConfig(config));
+		const target = store;
+		untrack(() => target.setConfig(config));
 	});
 
 	const [y, x] = $derived(position.split('-') as ['top' | 'bottom', 'left' | 'center' | 'right']);
@@ -102,6 +107,7 @@
 <div
 	class="cool-toaster"
 	data-cool-toaster
+	data-inline={inline ? 'true' : undefined}
 	data-position={position}
 	data-side={side}
 	data-y={y}
@@ -141,10 +147,10 @@
 					animate:flip={{ duration: exitMs, easing: cubicOut }}
 					out:fade={{ duration: exitMs, easing: cubicOut }}
 				>
-					<Toast {record} {side} {view} reducedMotion={reducedMotion.current} />
+					<Toast {record} {side} {view} {store} reducedMotion={reducedMotion.current} />
 				</li>
 			{/each}
 		{/if}
 	</ol>
-	<Announcer />
+	<Announcer {store} />
 </div>

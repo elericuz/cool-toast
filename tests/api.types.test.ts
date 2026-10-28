@@ -139,6 +139,7 @@ describe('public type surface (STYLE-7)', () => {
 			| 'showTimestamp'
 			| 'onDismiss'
 			| 'onAutoClose'
+			| 'toasterId'
 		>();
 	});
 
@@ -162,6 +163,8 @@ describe('public type surface (STYLE-7)', () => {
 			| 'showTimestamp'
 			| 'dir'
 			| 'labels'
+			| 'id'
+			| 'inline'
 		>();
 		expectTypeOf<Public.ToasterProps['closeButton']>().toEqualTypeOf<
 			boolean | 'top-left' | 'top-right' | undefined

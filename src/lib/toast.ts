@@ -1,4 +1,4 @@
-import { getStore } from './toast-store.svelte';
+import { allStores, DEFAULT_TOASTER_ID, findStoreOf, getStore } from './toast-store.svelte';
 import type {
 	DismissFilter,
 	PromiseData,
@@ -9,10 +9,13 @@ import type {
 
 type ToastFn = (title: string, options?: ToastOptions) => string | number;
 
+// Cada toast va al store del Toaster indicado en `toasterId` (TOASTER-2)
+const storeFor = (options?: ToastOptions) => getStore(options?.toasterId ?? DEFAULT_TOASTER_ID);
+
 const createTyped =
 	(type: ToastType): ToastFn =>
 	(title, options) =>
-		getStore().add({ title, type, options });
+		storeFor(options).add({ title, type, options });
 
 // Resuelve un valor fijo o calculado a partir del resultado de la promesa.
 // Toda función es un resolver (API-6): un Snippet debe llegar envuelto en `() => snippet`.
@@ -23,7 +26,9 @@ function resolveValue<V, R>(value: R | ((input: V) => R), input: V): R {
 function promise<T>(promise: Promise<T>, data: PromiseData<T>): string {
 	const { loading, success, error, description, action, ...rest } = data;
 	// Sin `options.id` el store siempre genera un id de tipo string
-	const id = getStore().add({
+	// El toast se liquida en el mismo store en el que nació
+	const store = storeFor(rest);
+	const id = store.add({
 		title: loading,
 		type: 'default',
 		phase: 'loading',
@@ -32,14 +37,14 @@ function promise<T>(promise: Promise<T>, data: PromiseData<T>): string {
 
 	promise.then(
 		(value) =>
-			getStore().settle(id, 'success', {
+			store.settle(id, 'success', {
 				title: resolveValue(success, value),
 				description:
 					description?.success === undefined ? undefined : resolveValue(description.success, value),
 				action: action?.success
 			}),
 		(reason: unknown) =>
-			getStore().settle(id, 'error', {
+			store.settle(id, 'error', {
 				title: resolveValue(error, reason),
 				description:
 					description?.error === undefined ? undefined : resolveValue(description.error, reason),
@@ -50,17 +55,23 @@ function promise<T>(promise: Promise<T>, data: PromiseData<T>): string {
 }
 
 function update(id: string | number, options: ToastUpdateOptions): void {
-	getStore().update(id, options);
+	// El id es único entre Toasters: se busca en el store que lo contiene
+	findStoreOf(id)?.update(id, options);
 }
 
 function dismiss(idOrFilter?: string | number | DismissFilter): void {
-	getStore().dismiss(idOrFilter, { manual: true });
+	// Un id afecta solo a su store; sin argumento o con filtro se aplica a todos los Toasters
+	if (typeof idOrFilter === 'string' || typeof idOrFilter === 'number') {
+		findStoreOf(idOrFilter)?.dismiss(idOrFilter, { manual: true });
+		return;
+	}
+	for (const store of allStores()) store.dismiss(idOrFilter, { manual: true });
 }
 
 /** API pública para crear, actualizar y descartar toasts. */
 export const toast = Object.assign(
 	(title: string, options?: ToastOptions): string | number =>
-		getStore().add({ title, type: 'default', options }),
+		storeFor(options).add({ title, type: 'default', options }),
 	{
 		success: createTyped('success'),
 		error: createTyped('error'),

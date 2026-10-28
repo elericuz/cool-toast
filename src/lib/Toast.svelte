@@ -30,7 +30,7 @@
 	import { morphPath, morphPathCenter, morphBox } from './morph-path';
 	import { resolveOptions } from './resolve-options';
 	import { createTimers } from './timers';
-	import { getStore, type ToastRecord } from './toast-store.svelte';
+	import type { ToastRecord, ToastStore } from './toast-store.svelte';
 	import type { ToastView } from './toast-view.svelte';
 
 	type TimerName = 'expand' | 'life' | 'display' | 'dismiss' | 'squish';
@@ -44,11 +44,11 @@
 		view: ToastView;
 		/** `prefers-reduced-motion: reduce` activo: todo salta sin animar. */
 		reducedMotion: boolean;
+		/** Store del Toaster que pinta este toast (config, descarte y anuncios). */
+		store: ToastStore;
 	}
 
-	let { record, side, view, reducedMotion }: Props = $props();
-
-	const store = getStore();
+	let { record, side, view, reducedMotion, store }: Props = $props();
 	const timers = createTimers();
 	const createdAt = new Date();
 	// Temporizadores que se congelan mientras el puntero está encima

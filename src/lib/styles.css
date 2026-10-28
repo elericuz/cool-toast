@@ -113,6 +113,43 @@
 	transform: translateX(-50%);
 }
 
+/*
+ * Toaster en línea (TOASTER-4): llena su ancestro posicionado en vez de la ventana. Va después de
+ * las reglas de anclaje para que `inset: 0` y `transform: none` las anulen; el offset pasa a ser
+ * relleno y la posición se resuelve alineando la lista dentro de la caja.
+ */
+[data-cool-toaster][data-inline="true"] {
+	position: absolute;
+	inset: 0;
+	transform: none;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	padding: var(--cool-toast-offset);
+	pointer-events: none;
+}
+
+[data-cool-toaster][data-inline="true"][data-y="bottom"] {
+	justify-content: flex-end;
+}
+
+[data-cool-toaster][data-inline="true"][data-side="left"] {
+	align-items: flex-start;
+}
+
+[data-cool-toaster][data-inline="true"][data-side="center"] {
+	align-items: center;
+}
+
+[data-cool-toaster][data-inline="true"][data-side="right"] {
+	align-items: flex-end;
+}
+
+/* La lista se ajusta a sus toasts y recibe el puntero; la caja del Toaster no */
+[data-cool-toaster][data-inline="true"] [data-cool-toast-list] {
+	pointer-events: auto;
+}
+
 [data-cool-toast-list] {
 	display: flex;
 	flex-direction: column;

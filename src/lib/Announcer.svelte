@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { ANNOUNCER_CLEAR_MS } from './constants';
-	import { getStore, type Politeness } from './toast-store.svelte';
+	import type { Politeness, ToastStore } from './toast-store.svelte';
 
-	const store = getStore();
+	// Cada Toaster anuncia en su propia región solo los toasts de su store (TOASTER-5)
+	let { store }: { store: ToastStore } = $props();
 
 	// Vacía cada región tras ANNOUNCER_CLEAR_MS para no releer anuncios viejos
 	function clearLater(politeness: Politeness) {
