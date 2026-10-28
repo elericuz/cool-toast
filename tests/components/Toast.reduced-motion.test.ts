@@ -33,7 +33,7 @@ describe('snapping (ANIM-4)', () => {
 		expect(li()).toHaveAttribute('data-reduced-motion', 'true');
 		expect(li()).toHaveAttribute('data-expanded', 'true');
 		expect(li()).toHaveAttribute('data-state', 'expanded');
-		expect(norm(pathD())).toBe(norm(morphPath(120, 300, 90, 1)));
+		expect(norm(pathD())).toBe(norm(morphPath(136, 320, 112, 1)));
 		await advance(1000);
 		expect(animateMock.calls).toHaveLength(0);
 		expect(q(li(), '.cool-toast-wrapper')!.style.transform).toBe('');
@@ -59,7 +59,7 @@ describe('snapping (ANIM-4)', () => {
 		await advance(1);
 		expect(li()).toHaveAttribute('data-state', 'pill');
 		expect(li()).toHaveAttribute('data-expanded', 'false');
-		expect(norm(pathD())).toBe(norm(morphPath(120, 300, 90, 0)));
+		expect(norm(pathD())).toBe(norm(morphPath(136, 320, 112, 0)));
 		await advance(799);
 		expect(onAutoClose).not.toHaveBeenCalled();
 		await advance(1);

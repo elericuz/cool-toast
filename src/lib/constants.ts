@@ -1,13 +1,14 @@
 // Constantes de geometría y tiempos (handoff §B.7), derivadas de goey-toast
 
 // Geometría de la píldora y del cuerpo (px)
-export const PILL_HEIGHT = 34;
+// Alto de la píldora: línea de cabecera (20) + padding vertical (12 + 12)
+export const PILL_HEIGHT = 44;
 export const PILL_RADIUS = PILL_HEIGHT / 2;
 export const NECK_CURVE_MAX = 14;
 export const BODY_CORNER_MAX = 16;
 export const PILL_THRESHOLD = 8;
-// Padding horizontal total de la píldora (10 px por lado): ancho = cabecera + padding
-export const PILL_PADDING_X = 20;
+// Padding horizontal total de la píldora (18 px por lado): ancho = cabecera + padding
+export const PILL_PADDING_X = 36;
 
 // Tiempos (ms)
 export const EXPAND_DELAY_MS = 330;

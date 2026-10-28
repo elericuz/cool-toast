@@ -13,8 +13,14 @@
 	--cool-toast-fill: #ffffff;
 	--cool-toast-border-color: none;
 	--cool-toast-border-width: 1.5;
-	--cool-toast-shadow: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.06))
-		drop-shadow(0 1px 4px rgba(0, 0, 0, 0.04));
+	--cool-toast-shadow: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.1))
+		drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
+	/* Densidad: el padding vertical de la píldora + la línea de cabecera (20) = PILL_HEIGHT (44) */
+	--cool-toast-pill-padding: 12px 18px;
+	--cool-toast-body-padding: 12px 18px 18px;
+	--cool-toast-title-size: 13px;
+	--cool-toast-description-size: 14px;
+	--cool-toast-radius-body: 16px;
 	--cool-toast-description-color: #444444;
 	--cool-toast-timestamp-color: #999999;
 	--cool-toast-close-color: #555555;
@@ -53,8 +59,8 @@
 /* Tema oscuro */
 [data-cool-toaster][data-theme="dark"] {
 	--cool-toast-fill: #1a1a1a;
-	--cool-toast-shadow: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
-		drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+	--cool-toast-shadow: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.45))
+		drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 	--cool-toast-description-color: #e0e0e0;
 	--cool-toast-timestamp-color: #777777;
 	--cool-toast-close-color: #e0e0e0;
@@ -162,21 +168,33 @@
 	margin: 0 auto;
 }
 
+/*
+ * Marco del toast: el JS fija su ancho y alto en línea por frame, iguales a la caja del path
+ * (D16). No recorta: la sombra del blob y el botón de cerrar sobresalen de él.
+ */
 .cool-toast-wrapper {
 	position: relative;
 	width: fit-content;
 }
 
-/* El blob se dibuja desde (0, 0) del wrapper; el path define su tamaño real */
+/*
+ * El blob se dibuja desde (0, 0) del SVG; el JS le da el ancho del cuerpo (bw) al medir. El alto
+ * es simbólico: el path define el tamaño real.
+ */
 .cool-toast-blob {
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 1px;
 	height: 1px;
 	overflow: visible;
 	pointer-events: none;
 	filter: var(--cool-toast-shadow);
+}
+
+/* Centro: el path centrado en [0, bw] se alinea con el centro del marco */
+[data-cool-toast][data-side="center"] .cool-toast-blob {
+	left: 50%;
+	transform: translateX(-50%);
 }
 
 /* Relleno por defecto cuando el toast no define fillColor (los atributos var() no son fiables) */
@@ -184,16 +202,45 @@
 	fill: var(--cool-toast-fill);
 }
 
+/*
+ * Caja de recorte: ocupa todo el marco. Su única pista de rejilla se dimensiona por el contenido y
+ * no por el marco, así el contenido conserva su tamaño intrínseco (sin reflujo durante la
+ * morfología) y se mide igual en cualquier estado.
+ */
+.cool-toast-clip {
+	position: relative;
+	display: grid;
+	grid-template-columns: fit-content(calc(100vw - 2 * var(--cool-toast-offset)));
+	width: 100%;
+	height: 100%;
+}
+
+/* Centro: el contenido se centra sobre el marco aunque lo desborde */
+[data-cool-toast][data-side="center"] .cool-toast-clip {
+	justify-content: center;
+}
+
+/* Contención (D16): fuera de "expanded" nada pinta fuera de la caja del path */
+[data-cool-toast]:not([data-state="expanded"]) .cool-toast-clip {
+	overflow: hidden;
+	clip-path: inset(0 round var(--cool-toast-radius-body));
+}
+
+[data-cool-toast][data-state="expanded"] .cool-toast-clip {
+	overflow: visible;
+	clip-path: none;
+}
+
 [data-cool-toast-content] {
 	position: relative;
 	box-sizing: border-box;
-	padding: 7px 10px;
+	padding: var(--cool-toast-pill-padding);
 }
 
 [data-cool-toast][data-expanded="true"] [data-cool-toast-content] {
-	min-width: 300px;
-	max-width: 380px;
-	padding: 7px 10px 16px 10px;
+	min-width: 320px;
+	max-width: 400px;
+	padding: var(--cool-toast-body-padding);
 }
 
 /* Derecha: el blob se espeja y el contenido se des-espeja para leerse normal (D10) */
@@ -209,7 +256,7 @@
 [data-cool-toast-header] {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 10px;
 	width: fit-content;
 	height: 20px;
 	white-space: nowrap;
@@ -237,21 +284,27 @@
 }
 
 [data-cool-toast-title] {
-	font-size: 13px;
+	font-size: var(--cool-toast-title-size);
 	font-weight: 600;
 	line-height: 20px;
+	letter-spacing: -0.01em;
 }
 
 [data-cool-toast-timestamp] {
 	color: var(--cool-toast-timestamp-color);
-	font-size: 11px;
+	font-size: 12px;
 	font-weight: 400;
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
 
 .cool-toast-body {
-	padding-top: 8px;
+	padding-top: 10px;
+}
+
+/* Cuerpo en plena salida: ya no recibe el puntero */
+.cool-toast-body[data-leaving="true"] {
+	pointer-events: none;
 }
 
 [data-cool-toast-description-row] {
@@ -267,8 +320,8 @@
 
 [data-cool-toast-description] {
 	color: var(--cool-toast-description-color);
-	font-size: 13px;
-	line-height: 1.45;
+	font-size: var(--cool-toast-description-size);
+	line-height: 1.5;
 	overflow-wrap: anywhere;
 }
 
@@ -282,11 +335,11 @@
 
 [data-cool-toast-action] {
 	width: 100%;
-	padding: 7px 12px;
+	padding: 12px 20px;
 	border: 0;
 	border-radius: 999px;
 	font: inherit;
-	font-size: 12px;
+	font-size: 14px;
 	font-weight: 600;
 	cursor: pointer;
 	transition: background-color 150ms ease;
@@ -302,9 +355,9 @@
 /* Barra de progreso                                                   */
 /* ------------------------------------------------------------------ */
 [data-cool-toast-progress] {
-	margin-top: 10px;
+	margin: 14px 0 0;
 	overflow: hidden;
-	border-radius: 3px;
+	border-radius: 2px;
 	background: var(--cool-toast-progress-track);
 }
 
@@ -347,12 +400,20 @@
 	cursor: pointer;
 }
 
+/* Esquinas relativas al wrapper, que mide lo mismo que el blob en todo estado (D10, D16) */
 [data-cool-toast-close][data-side="top-left"] {
 	left: -6px;
+	right: auto;
 }
 
 [data-cool-toast-close][data-side="top-right"] {
 	right: -6px;
+	left: auto;
+}
+
+/* Derecha: el wrapper está espejado; el botón se des-espeja para que la "×" quede derecha */
+[data-cool-toast][data-side="right"] [data-cool-toast-close] {
+	transform: scaleX(-1);
 }
 
 /* ------------------------------------------------------------------ */

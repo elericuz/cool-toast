@@ -76,11 +76,20 @@ describe('test harness', () => {
 		expect(custom.offsetHeight).toBe(60);
 		const content = document.createElement('div');
 		content.setAttribute('data-cool-toast-content', '');
-		expect([content.offsetWidth, content.offsetHeight]).toEqual([120, 34]);
+		expect([content.offsetWidth, content.offsetHeight]).toEqual([150, 44]);
 		const row = document.createElement('div');
 		row.setAttribute('data-cool-toast-description-row', '');
 		content.append(row);
-		expect([content.offsetWidth, content.offsetHeight]).toEqual([300, 90]);
+		expect([content.offsetWidth, content.offsetHeight]).toEqual([320, 112]);
+		// Los nodos en salida no cuentan como contenido expandido
+		const leaving = document.createElement('div');
+		leaving.setAttribute('data-leaving', 'true');
+		const leavingRow = document.createElement('div');
+		leavingRow.setAttribute('data-cool-toast-description-row', '');
+		leaving.append(leavingRow);
+		row.remove();
+		content.append(leaving);
+		expect([content.offsetWidth, content.offsetHeight]).toEqual([150, 44]);
 	});
 
 	it('advances fake timers without real waiting', () => {

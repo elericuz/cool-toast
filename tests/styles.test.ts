@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { PILL_HEIGHT } from '../src/lib/constants';
 
 // COOL_TOAST_CSS permite validar el propio test contra una hoja de referencia
 const cssPath = process.env.COOL_TOAST_CSS ?? resolve(import.meta.dirname, '../src/lib/styles.css');
@@ -86,7 +87,9 @@ const norm = (value: string | undefined) =>
 		.replace(/!important/g, '')
 		.replace(/'/g, '"')
 		.replace(/\s+/g, '')
-		.replace(/(^|[^0-9])0\./g, '$1.');
+		.replace(/(^|[^0-9])0\./g, '$1.')
+		// Prettier reescribe .10 como .1: se ignoran los ceros finales de los decimales
+		.replace(/(\.\d*?)0+(?=\D|$)/g, '$1');
 
 const selectorsOf = (rule: Rule) =>
 	rule.prelude.split(',').map((s) => s.replace(/\s+/g, ' ').trim());
@@ -116,7 +119,12 @@ const lightVariables: Record<string, string> = {
 	'--cool-toast-border-color': 'none',
 	'--cool-toast-border-width': '1.5',
 	'--cool-toast-shadow':
-		'drop-shadow(0 4px 12px rgba(0,0,0,.06)) drop-shadow(0 1px 4px rgba(0,0,0,.04))',
+		'drop-shadow(0 10px 24px rgba(0,0,0,.10)) drop-shadow(0 2px 6px rgba(0,0,0,.06))',
+	'--cool-toast-pill-padding': '12px 18px',
+	'--cool-toast-body-padding': '12px 18px 18px',
+	'--cool-toast-title-size': '13px',
+	'--cool-toast-description-size': '14px',
+	'--cool-toast-radius-body': '16px',
 	'--cool-toast-description-color': '#444444',
 	'--cool-toast-timestamp-color': '#999999',
 	'--cool-toast-close-color': '#555555',
@@ -149,7 +157,7 @@ const lightVariables: Record<string, string> = {
 const darkVariables: Record<string, string> = {
 	'--cool-toast-fill': '#1a1a1a',
 	'--cool-toast-shadow':
-		'drop-shadow(0 4px 12px rgba(0,0,0,.3)) drop-shadow(0 1px 4px rgba(0,0,0,.2))',
+		'drop-shadow(0 10px 24px rgba(0,0,0,.45)) drop-shadow(0 2px 6px rgba(0,0,0,.3))',
 	'--cool-toast-description-color': '#e0e0e0',
 	'--cool-toast-timestamp-color': '#777777',
 	'--cool-toast-close-color': '#e0e0e0',
@@ -401,10 +409,10 @@ describe('stack layout (design D6)', () => {
 		expect(norm(list['align-items'])).toBe(alignment);
 	});
 
-	it('sizes the expanded content between 300px and 380px', () => {
+	it('sizes the expanded content between 320px and 400px', () => {
 		const content = declarationsFor((s) => s.includes('[data-cool-toast-content]'));
-		expect(norm(content['min-width'])).toBe('300px');
-		expect(norm(content['max-width'])).toBe('380px');
+		expect(norm(content['min-width'])).toBe('320px');
+		expect(norm(content['max-width'])).toBe('400px');
 	});
 });
 
@@ -426,5 +434,152 @@ describe('mirroring for the right side (design D10)', () => {
 		expect(norm(right['margin-left'])).toBe('auto');
 		const center = declarationsFor((s) => /^\[data-cool-toast\]\[data-side="center"\]$/.test(s));
 		expect(norm(center.margin)).toBe('0auto');
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Helpers v1.1: declaraciones de reglas con un selector exacto (sin mezclar reglas vecinas)
+// ---------------------------------------------------------------------------
+const squash = (selector: string) => selector.replace(/\s+/g, ' ').trim();
+const exact = (selector: string) => declarationsFor((s) => squash(s) === squash(selector));
+
+// ---------------------------------------------------------------------------
+// STYLE-9: densidad premium
+// ---------------------------------------------------------------------------
+describe('premium density values (STYLE-9)', () => {
+	it('compact content uses the pill padding variable', () => {
+		expect(norm(exact('[data-cool-toast-content]').padding)).toBe('var(--cool-toast-pill-padding)');
+	});
+
+	it('expanded content is 320-400px wide with the body padding variable', () => {
+		const expanded = exact('[data-cool-toast][data-expanded="true"] [data-cool-toast-content]');
+		expect(norm(expanded['min-width'])).toBe('320px');
+		expect(norm(expanded['max-width'])).toBe('400px');
+		expect(norm(expanded.padding)).toBe('var(--cool-toast-body-padding)');
+	});
+
+	it('header is 20px tall with a 10px gap', () => {
+		const header = exact('[data-cool-toast-header]');
+		expect(norm(header.height)).toBe('20px');
+		expect(norm(header.gap)).toBe('10px');
+	});
+
+	it('title uses the size variable, weight 600, 20px line and tight tracking', () => {
+		const title = exact('[data-cool-toast-title]');
+		expect(norm(title['font-size'])).toBe('var(--cool-toast-title-size)');
+		expect(norm(title['font-weight'])).toBe('600');
+		expect(norm(title['line-height'])).toBe('20px');
+		expect(norm(title['letter-spacing'])).toBe('-.01em');
+	});
+
+	it('timestamp is 12px', () => {
+		expect(norm(exact('[data-cool-toast-timestamp]')['font-size'])).toBe('12px');
+	});
+
+	it('description uses the size variable with line-height 1.5; body adds 10px on top', () => {
+		const description = exact('[data-cool-toast-description]');
+		expect(norm(description['font-size'])).toBe('var(--cool-toast-description-size)');
+		expect(norm(description['line-height'])).toBe('1.5');
+		expect(norm(exact('.cool-toast-body')['padding-top'])).toBe('10px');
+	});
+
+	it('action button is 12px 20px, 14px, weight 600 and fully rounded', () => {
+		const action = exact('[data-cool-toast-action]');
+		expect(norm(action.padding)).toBe('12px20px');
+		expect(norm(action['font-size'])).toBe('14px');
+		expect(norm(action['font-weight'])).toBe('600');
+		expect(norm(action['border-radius'])).toBe('999px');
+	});
+
+	it('icon is 18x18', () => {
+		const icon = exact('[data-cool-toast-icon]');
+		expect(norm(icon.width)).toBe('18px');
+		expect(norm(icon.height)).toBe('18px');
+	});
+
+	it('keeps the pill height budget: header 20 + vertical padding 12 + 12', () => {
+		expect(20 + 12 + 12).toBe(PILL_HEIGHT);
+	});
+
+	it.each([
+		'--cool-toast-pill-padding',
+		'--cool-toast-body-padding',
+		'--cool-toast-title-size',
+		'--cool-toast-description-size',
+		'--cool-toast-radius-body'
+	])('%s is read through var()', (name) => {
+		expect(css, name).toMatch(new RegExp(`var\\(\\s*${name}\\b`));
+	});
+});
+
+// ---------------------------------------------------------------------------
+// STYLE-10: inset de la barra de progreso
+// ---------------------------------------------------------------------------
+describe('progress bar inset (STYLE-10)', () => {
+	it('insets the progress track 14px from the action and rounds it', () => {
+		const progress = exact('[data-cool-toast-progress]');
+		expect(norm(progress.margin)).toBe('14px00');
+		expect(norm(progress['border-radius'])).toBe('2px');
+		expect(norm(progress.overflow)).toBe('hidden');
+	});
+
+	it('keeps the bar 3px tall', () => {
+		expect(norm(exact('.cool-toast-progress-bar').height)).toBe('3px');
+	});
+});
+
+// ---------------------------------------------------------------------------
+// STYLE-11: reglas de contención
+// ---------------------------------------------------------------------------
+describe('containment rules (STYLE-11)', () => {
+	it('wrapper is positioned and fits its content', () => {
+		const wrapper = exact('.cool-toast-wrapper');
+		expect(norm(wrapper.position)).toBe('relative');
+		expect(norm(wrapper.width)).toBe('fit-content');
+	});
+
+	it('clips the inner box (.cool-toast-clip) in every non-expanded state', () => {
+		const clipped = exact('[data-cool-toast]:not([data-state="expanded"]) .cool-toast-clip');
+		expect(norm(clipped.overflow)).toBe('hidden');
+		expect(norm(clipped['clip-path'])).toBe('inset(0roundvar(--cool-toast-radius-body))');
+	});
+
+	it('releases the inner clip when expanded', () => {
+		const open = exact('[data-cool-toast][data-state="expanded"] .cool-toast-clip');
+		expect(norm(open.overflow)).toBe('visible');
+		expect(norm(open['clip-path'])).toBe('none');
+	});
+
+	it('no longer clips at the content level', () => {
+		const content = declarationsFor(
+			(s) => s.includes('[data-cool-toast-content]') && s.includes('[data-state'),
+			styleRules
+		);
+		expect(content['clip-path']).toBeUndefined();
+		expect(content.overflow).toBeUndefined();
+	});
+
+	it('leaving body ignores pointer events', () => {
+		expect(norm(exact('.cool-toast-body[data-leaving="true"]')['pointer-events'])).toBe('none');
+	});
+
+	it('anchors the close button on the wrapper corners', () => {
+		const close = exact('[data-cool-toast-close]');
+		expect(norm(close.position)).toBe('absolute');
+		expect(norm(close.top)).toBe('-6px');
+		expect(norm(close.width)).toBe('20px');
+		expect(norm(close.height)).toBe('20px');
+		expect(norm(close['border-radius'])).toBe('50%');
+		const right = exact('[data-cool-toast-close][data-side="top-right"]');
+		expect(norm(right.right)).toBe('-6px');
+		expect(norm(right.left)).toBe('auto');
+		const left = exact('[data-cool-toast-close][data-side="top-left"]');
+		expect(norm(left.left)).toBe('-6px');
+		expect(norm(left.right)).toBe('auto');
+	});
+
+	it('counter-mirrors the close button on the right side', () => {
+		const mirrored = exact('[data-cool-toast][data-side="right"] [data-cool-toast-close]');
+		expect(norm(mirrored.transform)).toBe('scalex(-1)');
 	});
 });

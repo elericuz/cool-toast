@@ -144,34 +144,51 @@ Exported types: `ToastType`, `ToastPhase`, `ToastOptions`, `ToastUpdateOptions`,
 Override any of these CSS custom properties on `[data-cool-toaster]` (dark values apply under
 `[data-theme="dark"]`):
 
-| Variable                                                | Light                             | Dark                              |
-| ------------------------------------------------------- | --------------------------------- | --------------------------------- |
-| `--cool-toast-font`                                     | system font stack                 | same                              |
-| `--cool-toast-fill`                                     | `#ffffff`                         | `#1a1a1a`                         |
-| `--cool-toast-border-color`                             | `none`                            | `none`                            |
-| `--cool-toast-border-width`                             | `1.5`                             | `1.5`                             |
-| `--cool-toast-shadow`                                   | soft drop shadow                  | stronger drop shadow              |
-| `--cool-toast-description-color`                        | `#444444`                         | `#e0e0e0`                         |
-| `--cool-toast-timestamp-color`                          | `#999999`                         | `#777777`                         |
-| `--cool-toast-close-color`                              | `#555555`                         | `#e0e0e0`                         |
-| `--cool-toast-progress-track`                           | `rgba(0,0,0,.06)`                 | `rgba(255,255,255,.1)`            |
-| `--cool-toast-default-color` / `-progress`              | `#555555` / `#999999`             | `#cccccc` / `#888888`             |
-| `--cool-toast-default-action-bg` / `-hover` / `-active` | `#E8E8E8` / `#DCDCDC` / `#D0D0D0` | `#3a3a3a` / `#444444` / `#4e4e4e` |
-| `--cool-toast-success-color`                            | `#4CAF50`                         | `#66BB6A`                         |
-| `--cool-toast-success-action-bg` / `-hover` / `-active` | `#C8E6C9` / `#A5D6A7` / `#81C784` | `#1b5e20` / `#2e7d32` / `#388e3c` |
-| `--cool-toast-error-color`                              | `#E53935`                         | `#EF5350`                         |
-| `--cool-toast-error-action-bg` / `-hover` / `-active`   | `#FFCDD2` / `#EF9A9A` / `#E57373` | `#b71c1c` / `#c62828` / `#d32f2f` |
-| `--cool-toast-warning-color`                            | `#C49000`                         | `#FFB300`                         |
-| `--cool-toast-warning-action-bg` / `-hover` / `-active` | `#FFECB3` / `#FFE082` / `#FFD54F` | `#4a3800` / `#5c4600` / `#6e5400` |
-| `--cool-toast-info-color`                               | `#1E88E5`                         | `#42A5F5`                         |
-| `--cool-toast-info-action-bg` / `-hover` / `-active`    | `#BBDEFB` / `#90CAF9` / `#64B5F6` | `#0d47a1` / `#1565c0` / `#1976d2` |
-| `--cool-toast-loading-color`                            | `#555555`                         | `#cccccc`                         |
+| Variable                                                | Light                                                                             | Dark                                                                             |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `--cool-toast-font`                                     | system font stack                                                                 | same                                                                             |
+| `--cool-toast-fill`                                     | `#ffffff`                                                                         | `#1a1a1a`                                                                        |
+| `--cool-toast-border-color`                             | `none`                                                                            | `none`                                                                           |
+| `--cool-toast-border-width`                             | `1.5`                                                                             | `1.5`                                                                            |
+| `--cool-toast-shadow`                                   | `drop-shadow(0 10px 24px rgba(0,0,0,.10)) drop-shadow(0 2px 6px rgba(0,0,0,.06))` | `drop-shadow(0 10px 24px rgba(0,0,0,.45)) drop-shadow(0 2px 6px rgba(0,0,0,.3))` |
+| `--cool-toast-pill-padding`                             | `12px 18px`                                                                       | same                                                                             |
+| `--cool-toast-body-padding`                             | `12px 18px 18px`                                                                  | same                                                                             |
+| `--cool-toast-title-size`                               | `13px`                                                                            | same                                                                             |
+| `--cool-toast-description-size`                         | `14px`                                                                            | same                                                                             |
+| `--cool-toast-radius-body`                              | `16px`                                                                            | same                                                                             |
+| `--cool-toast-description-color`                        | `#444444`                                                                         | `#e0e0e0`                                                                        |
+| `--cool-toast-timestamp-color`                          | `#999999`                                                                         | `#777777`                                                                        |
+| `--cool-toast-close-color`                              | `#555555`                                                                         | `#e0e0e0`                                                                        |
+| `--cool-toast-progress-track`                           | `rgba(0,0,0,.06)`                                                                 | `rgba(255,255,255,.1)`                                                           |
+| `--cool-toast-default-color` / `-progress`              | `#555555` / `#999999`                                                             | `#cccccc` / `#888888`                                                            |
+| `--cool-toast-default-action-bg` / `-hover` / `-active` | `#E8E8E8` / `#DCDCDC` / `#D0D0D0`                                                 | `#3a3a3a` / `#444444` / `#4e4e4e`                                                |
+| `--cool-toast-success-color`                            | `#4CAF50`                                                                         | `#66BB6A`                                                                        |
+| `--cool-toast-success-action-bg` / `-hover` / `-active` | `#C8E6C9` / `#A5D6A7` / `#81C784`                                                 | `#1b5e20` / `#2e7d32` / `#388e3c`                                                |
+| `--cool-toast-error-color`                              | `#E53935`                                                                         | `#EF5350`                                                                        |
+| `--cool-toast-error-action-bg` / `-hover` / `-active`   | `#FFCDD2` / `#EF9A9A` / `#E57373`                                                 | `#b71c1c` / `#c62828` / `#d32f2f`                                                |
+| `--cool-toast-warning-color`                            | `#C49000`                                                                         | `#FFB300`                                                                        |
+| `--cool-toast-warning-action-bg` / `-hover` / `-active` | `#FFECB3` / `#FFE082` / `#FFD54F`                                                 | `#4a3800` / `#5c4600` / `#6e5400`                                                |
+| `--cool-toast-info-color`                               | `#1E88E5`                                                                         | `#42A5F5`                                                                        |
+| `--cool-toast-info-action-bg` / `-hover` / `-active`    | `#BBDEFB` / `#90CAF9` / `#64B5F6`                                                 | `#0d47a1` / `#1565c0` / `#1976d2`                                                |
+| `--cool-toast-loading-color`                            | `#555555`                                                                         | `#cccccc`                                                                        |
 
 `--cool-toast-gap` and `--cool-toast-offset` are set from the `gap` and `offset` props. Per-toast colours can also
 be set with `fillColor`, `borderColor` and `borderWidth`, and extra classes with `classes`.
 
 `--cool-toast-progress-duration` is set inline on each progress bar by the library (the visible time of the toast);
 treat it as read-only.
+
+### Density and layout
+
+- `--cool-toast-pill-padding` and `--cool-toast-body-padding` set the padding of the compact pill and of the
+  expanded body. The expanded body is 320–400 px wide (never wider than the viewport minus twice the `offset`).
+- `--cool-toast-radius-body` rounds the clipping box that keeps text inside the blob while it morphs.
+- The pill is drawn 44 px tall: a 20 px header line plus 12 px of vertical pill padding on each side. If you change
+  the vertical part of `--cool-toast-pill-padding`, the toast still measures its content and the blob grows to fit,
+  but the pill will no longer be 44 px tall (advanced override).
+- The library writes the inline `width` and `height` of `.cool-toast-wrapper` on every animation frame so that it
+  matches the blob; do not size the wrapper from your own CSS. The close button sits on the wrapper's top corner
+  (`-6px` inset), so it follows the blob in every state.
 
 ## Reduced motion
 

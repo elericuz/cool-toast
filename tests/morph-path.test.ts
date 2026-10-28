@@ -32,112 +32,112 @@ function expectInOrder(d: string, fragments: string[]) {
 
 describe('morphPath', () => {
 	it('MORPH-1 returns the pill at t = 0', () => {
-		expect(norm(morphPath(120, 300, 90, 0))).toBe(
-			'M 0,17 A 17,17 0 0 1 17,0 H 103 A 17,17 0 0 1 120,17 A 17,17 0 0 1 103,34 H 17 A 17,17 0 0 1 0,17 Z'
+		expect(norm(morphPath(136, 320, 112, 0))).toBe(
+			'M 0,22 A 22,22 0 0 1 22,0 H 114 A 22,22 0 0 1 136,22 A 22,22 0 0 1 114,44 H 22 A 22,22 0 0 1 0,22 Z'
 		);
 	});
 
 	it('MORPH-1 pill follows the pill width argument', () => {
-		expect(norm(morphPath(200, 300, 90, 0))).toBe(
-			'M 0,17 A 17,17 0 0 1 17,0 H 183 A 17,17 0 0 1 200,17 A 17,17 0 0 1 183,34 H 17 A 17,17 0 0 1 0,17 Z'
+		expect(norm(morphPath(200, 320, 112, 0))).toBe(
+			'M 0,22 A 22,22 0 0 1 22,0 H 178 A 22,22 0 0 1 200,22 A 22,22 0 0 1 178,44 H 22 A 22,22 0 0 1 0,22 Z'
 		);
 	});
 
 	it('MORPH-2 stays a pill while the body is below the threshold', () => {
-		const pill = morphPath(120, 300, 90, 0);
-		expect(morphPath(120, 300, 90, 0.1)).toBe(pill);
-		// 56·0.14 = 7.84 < 8 sigue siendo píldora
-		expect(morphPath(120, 300, 90, 0.14)).toBe(pill);
+		const pill = morphPath(136, 320, 112, 0);
+		expect(morphPath(136, 320, 112, 0.1)).toBe(pill);
+		// 68·0.11 = 7.48 < 8 sigue siendo píldora
+		expect(morphPath(136, 320, 112, 0.11)).toBe(pill);
 	});
 
 	it('MORPH-2 leaves the pill once body − PH reaches the threshold', () => {
-		expect(morphPath(120, 300, 90, 0.15)).not.toBe(morphPath(120, 300, 90, 0));
-		expect(maxY(morphPath(120, 300, 90, 0.15))).toBeCloseTo(42.4, 3);
+		expect(morphPath(136, 320, 112, 0.12)).not.toBe(morphPath(136, 320, 112, 0));
+		expect(maxY(morphPath(136, 320, 112, 0.12))).toBeCloseTo(52.16, 3);
 	});
 
 	it('MORPH-3 draws the full body at t = 1', () => {
-		expectInOrder(norm(morphPath(120, 300, 90, 1)), [
-			'M 0,17',
-			'A 17,17 0 0 1 17,0',
-			'H 103',
-			'A 17,17 0 0 1 120,17',
-			'L 120,20',
-			'Q 120,34 134,34',
-			'H 284',
-			'A 16,16 0 0 1 300,50',
-			'L 300,74',
-			'A 16,16 0 0 1 284,90',
+		expectInOrder(norm(morphPath(136, 320, 112, 1)), [
+			'M 0,22',
+			'A 22,22 0 0 1 22,0',
+			'H 114',
+			'A 22,22 0 0 1 136,22',
+			'L 136,30',
+			'Q 136,44 150,44',
+			'H 304',
+			'A 16,16 0 0 1 320,60',
+			'L 320,96',
+			'A 16,16 0 0 1 304,112',
 			'H 16',
-			'A 16,16 0 0 1 0,74',
+			'A 16,16 0 0 1 0,96',
 			'Z'
 		]);
 	});
 
 	it('MORPH-3 adapts to different body dimensions', () => {
-		// th 70: cr = min(16, 36·0.45) = 16; bodyW 250 → H 234
-		const d = norm(morphPath(100, 250, 70, 1));
-		expectInOrder(d, ['L 100,20', 'Q 100,34 114,34', 'H 234', 'A 16,16 0 0 1 250,50', 'L 250,54']);
+		// th 100: cr = min(16, 56·0.45) = 16; bodyW 250 → H 234
+		const d = norm(morphPath(100, 250, 100, 1));
+		expectInOrder(d, ['L 100,30', 'Q 100,44 114,44', 'H 234', 'A 16,16 0 0 1 250,60', 'L 250,84']);
 	});
 
 	it('MORPH-4 interpolates the intermediate shape at t = 0.5', () => {
-		const d = norm(morphPath(120, 300, 90, 0.5));
-		// curve 7 aparece implícito: bodyTop 27 = 34 − 7 y qEndX 127 = 120 + 7
+		const d = norm(morphPath(136, 320, 112, 0.5));
+		// curve 7 aparece implícito: bodyTop 37 = 44 − 7 y qEndX 143 = 136 + 7
 		expectInOrder(d, [
-			'L 120,27',
-			'Q 120,34 127,34',
-			'H 197.4',
-			'A 12.6,12.6 0 0 1 210,46.6',
-			'L 210,49.4',
-			'A 12.6,12.6 0 0 1 197.4,62',
-			'H 12.6',
-			'A 12.6,12.6 0 0 1 0,49.4',
+			'L 136,37',
+			'Q 136,44 143,44',
+			'H 212.7',
+			'A 15.3,15.3 0 0 1 228,59.3',
+			'L 228,62.7',
+			'A 15.3,15.3 0 0 1 212.7,78',
+			'H 15.3',
+			'A 15.3,15.3 0 0 1 0,62.7',
 			'Z'
 		]);
 	});
 
 	it('MORPH-5 clamps the pill width to the body width', () => {
-		expect(norm(morphPath(400, 300, 90, 0))).toBe(
-			'M 0,17 A 17,17 0 0 1 17,0 H 283 A 17,17 0 0 1 300,17 A 17,17 0 0 1 283,34 H 17 A 17,17 0 0 1 0,17 Z'
+		expect(norm(morphPath(400, 320, 112, 0))).toBe(
+			'M 0,22 A 22,22 0 0 1 22,0 H 298 A 22,22 0 0 1 320,22 A 22,22 0 0 1 298,44 H 22 A 22,22 0 0 1 0,22 Z'
 		);
 	});
 
 	it('MORPH-7 grows monotonically in height', () => {
-		const heights = [0, 0.25, 0.5, 0.75, 1].map((t) => maxY(morphPath(120, 300, 90, t)));
-		expect(heights).toEqual([34, 48, 62, 76, 90]);
+		const heights = [0, 0.25, 0.5, 0.75, 1].map((t) => maxY(morphPath(136, 320, 112, t)));
+		expect(heights).toEqual([44, 61, 78, 95, 112]);
 	});
 
 	it('MORPH-8 memoises identical calls and stays correct across alternating args', () => {
-		const first = morphPath(120, 300, 90, 0.5);
-		expect(morphPath(120, 300, 90, 0.5)).toBe(first);
-		const other = morphPath(150, 320, 100, 0.8);
+		const first = morphPath(136, 320, 112, 0.5);
+		expect(morphPath(136, 320, 112, 0.5)).toBe(first);
+		const other = morphPath(150, 340, 120, 0.8);
 		expect(other).not.toBe(first);
-		expect(morphPath(120, 300, 90, 0.5)).toBe(first);
+		expect(morphPath(136, 320, 112, 0.5)).toBe(first);
 	});
 });
 
 describe('morphPathCenter', () => {
 	it('MORPH-6 draws a centred pill at t = 0', () => {
-		const d = norm(morphPathCenter(120, 300, 90, 0));
-		expect(d.startsWith('M 90,17')).toBe(true);
+		const d = norm(morphPathCenter(136, 320, 112, 0));
+		expect(d.startsWith('M 92,22')).toBe(true);
 		expect(d.endsWith('Z')).toBe(true);
 		const found = numbers(d);
-		expect(found).toContain(90);
-		expect(found).toContain(210);
-		// ningún punto sale del rango 90..210
-		expect(found.filter((n) => n > 210)).toEqual([]);
+		expect(found).toContain(92);
+		expect(found).toContain(228);
+		// ningún punto sale del rango 92..228
+		expect(found.filter((n) => n > 228)).toEqual([]);
 	});
 
-	it('MORPH-6 spans 0..300 with two fillets at t = 1', () => {
-		const found = numbers(morphPathCenter(120, 300, 90, 1));
-		expect(found).toContain(76); // qLeftX = max(16, 90 − 14)
-		expect(found).toContain(224); // qRightX = min(284, 210 + 14)
-		expect(found).toContain(300);
+	it('MORPH-6 spans 0..320 with two fillets at t = 1', () => {
+		const found = numbers(morphPathCenter(136, 320, 112, 1));
+		expect(found).toContain(78); // qLeftX = max(16, 92 − 14)
+		expect(found).toContain(242); // qRightX = min(304, 228 + 14)
+		expect(found).toContain(320);
 		expect(found).toContain(0);
-		expect(maxY(morphPathCenter(120, 300, 90, 1))).toBe(90);
+		expect(maxY(morphPathCenter(136, 320, 112, 1))).toBe(112);
 	});
 
 	it('MORPH-6 centres a different pill width', () => {
-		// pw 100, bw 300 → offset 100
-		expect(norm(morphPathCenter(100, 300, 90, 0)).startsWith('M 100,17')).toBe(true);
+		// pw 120, bw 320 → offset 100
+		expect(norm(morphPathCenter(120, 320, 112, 0)).startsWith('M 100,22')).toBe(true);
 	});
 });

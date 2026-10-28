@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { flushSync, tick, untrack } from 'svelte';
 	// cubicOut aproxima la curva de goey cubic-bezier(.4, 0, .2, 1) para las salidas (FADE_MS)
 	import { cubicOut } from 'svelte/easing';
 	import { fade, type TransitionConfig } from 'svelte/transition';
@@ -27,7 +27,7 @@
 	} from './constants';
 	import Icon from './Icon.svelte';
 	import { AnimationChannel, MorphDriver } from './morph-driver';
-	import { morphPath, morphPathCenter } from './morph-path';
+	import { morphPath, morphPathCenter, morphBox } from './morph-path';
 	import { resolveOptions } from './resolve-options';
 	import { createTimers } from './timers';
 	import { getStore, type ToastRecord } from './toast-store.svelte';
@@ -93,24 +93,74 @@
 	let wrapperEl = $state<HTMLElement>();
 	let headerEl = $state<HTMLElement>();
 	let contentEl = $state<HTMLElement>();
+	// Cuerpo actual (sigue en el DOM mientras corre su transición de salida)
+	let bodyEl = $state<HTMLElement>();
+	let blobEl = $state<SVGSVGElement>();
 	let pathEl = $state<SVGPathElement>();
 
 	// Medidas del blob: valores planos, nunca $state (se usan en cada frame)
 	const dims = { pw: PILL_HEIGHT, bw: PILL_HEIGHT, th: PILL_HEIGHT };
+	// Cada frame escribe solo el path y el tamaño del wrapper, que sigue a la caja del path (D16)
 	const driver = new MorphDriver((t) => {
+		const { pw, bw, th } = dims;
 		const pathFn = side === 'center' ? morphPathCenter : morphPath;
-		pathEl?.setAttribute('d', pathFn(dims.pw, dims.bw, dims.th, t));
+		pathEl?.setAttribute('d', pathFn(pw, bw, th, t));
+		if (!wrapperEl) return;
+		const box = morphBox(pw, bw, th, t);
+		wrapperEl.style.width = `${box.width}px`;
+		wrapperEl.style.height = `${box.height}px`;
 	});
 	const squishChannel = new AnimationChannel();
 	const shakeChannel = new AnimationChannel();
 	let lastSquishAt = -Infinity;
 	let collapseReason: CollapseReason = 'auto';
 
+	type Dims = typeof dims;
+
+	/**
+	 * Lee las medidas que tendrá el toast: los nodos en salida ([data-leaving]) se ocultan
+	 * durante la lectura para que no cuenten (D11). No escribe en `dims`.
+	 */
+	function readDims(): Dims | null {
+		if (!headerEl || !contentEl) return null;
+		const leaving = Array.from(contentEl.querySelectorAll<HTMLElement>('[data-leaving]'));
+		const displays = leaving.map((node) => node.style.display);
+		for (const node of leaving) node.style.display = 'none';
+		const pw = headerEl.offsetWidth + PILL_PADDING_X;
+		const next = {
+			pw,
+			bw: Math.max(contentEl.offsetWidth, pw),
+			th: Math.max(contentEl.offsetHeight, PILL_HEIGHT)
+		};
+		leaving.forEach((node, index) => (node.style.display = displays[index]));
+		return next;
+	}
+
+	// Cambia las medidas fuera de los frames. El SVG mide `bw`: el path centrado se dibuja en
+	// [0, bw] y el CSS centra el SVG sobre el wrapper
+	function setDims(next: Partial<Dims>) {
+		Object.assign(dims, next);
+		if (blobEl) blobEl.style.width = `${dims.bw}px`;
+	}
+
 	function measure() {
-		if (!headerEl || !contentEl) return;
-		dims.pw = headerEl.offsetWidth + PILL_PADDING_X;
-		dims.bw = Math.max(contentEl.offsetWidth, dims.pw);
-		dims.th = Math.max(contentEl.offsetHeight, PILL_HEIGHT);
+		const next = readDims();
+		if (next) setDims(next);
+	}
+
+	// Medidas del cuerpo al expandir: la píldora conserva el ancho medido en estado píldora
+	// (con la hora de la cabecera), así el cuello del path no salta al ocultarla
+	function measureBody() {
+		const next = readDims();
+		if (!next) return;
+		setDims({ bw: Math.max(next.bw, dims.pw), th: next.th });
+	}
+
+	// Ya en píldora y sin cuerpo saliente: las medidas vuelven a las compactas sin cambiar la forma
+	function settlePill() {
+		if (view.state !== 'pill' || bodyShown) return;
+		measure();
+		driver.redraw();
 	}
 
 	function startTimer(name: TimerName, ms: number, callback: () => void) {
@@ -160,6 +210,8 @@
 	// Muestra el cuerpo; la morfología arranca cuando el cuerpo ya está en el DOM (efecto de abajo)
 	function expand() {
 		timers.clear('dismiss');
+		// Un cuerpo que estaba saliendo se reanuda: deja de marcarse como saliente
+		bodyEl?.removeAttribute('data-leaving');
 		view.expanded = true;
 		view.state = 'morphing';
 		bodyShown = true;
@@ -181,11 +233,19 @@
 		timers.clear('display');
 		collapseReason = reason;
 		view.state = 'collapsing';
+		bodyEl?.setAttribute('data-leaving', 'true');
 		bodyShown = false;
+		// La cabecera recupera su hora en el DOM antes de medir el destino
+		flushSync();
+		// Interpola desde el cuerpo expandido (bw/th actuales) hasta la píldora destino (pw)
+		const target = readDims();
+		if (target) setDims({ pw: target.pw, bw: Math.max(dims.bw, target.pw) });
 		const finish = () => {
 			view.state = 'pill';
 			view.expanded = false;
 			after();
+			// Con el DOM ya compacto se adoptan las medidas destino; la píldora no cambia
+			void tick().then(settlePill);
 		};
 		if (reducedMotion) {
 			driver.snap(0);
@@ -248,14 +308,15 @@
 			driver.redraw();
 			return;
 		}
-		const contentWidth = contentEl.offsetWidth;
+		// `bw` queda fijo durante la animación (la píldora solo depende de pw): el SVG no cambia de
+		// ancho por frame
+		setDims({ bw: Math.max(contentEl.offsetWidth, from, to) });
 		driver.animateValue(
 			from,
 			to,
 			pillResizeOptions(resolved.bounce, resolved.spring),
 			(width) => {
 				dims.pw = width;
-				dims.bw = Math.max(contentWidth, width);
 				driver.redraw();
 			},
 			() => {
@@ -299,7 +360,7 @@
 	$effect(() => {
 		if (!bodyShown) return;
 		untrack(() => {
-			measure();
+			measureBody();
 			if (reducedMotion) {
 				driver.snap(1);
 				onExpanded();
@@ -370,122 +431,139 @@
 </script>
 
 <div bind:this={wrapperEl} class={['cool-toast-wrapper', classes.wrapper]}>
-	<svg class="cool-toast-blob" data-cool-toast-blob aria-hidden="true">
+	<svg bind:this={blobEl} class="cool-toast-blob" data-cool-toast-blob aria-hidden="true">
 		<path bind:this={pathEl} {fill} {stroke} stroke-width={strokeWidth} />
 	</svg>
 
-	<div
-		bind:this={contentEl}
-		class={['cool-toast-content', classes.content]}
-		data-cool-toast-content
-	>
-		<div bind:this={headerEl} class={['cool-toast-header', classes.header]} data-cool-toast-header>
-			<span class={['cool-toast-icon', classes.icon]} data-cool-toast-icon>
-				{#if record.icon !== null}
-					{#key record.phase}
-						<span class="cool-toast-icon-glyph" in:iconSwap out:iconSwap>
-							{#if record.icon}
-								{@render record.icon()}
-							{:else}
-								<Icon phase={record.phase} />
-							{/if}
-						</span>
-					{/key}
-				{/if}
-			</span>
-			<span class={['cool-toast-title', classes.title]} data-cool-toast-title>{record.title}</span>
-			{#if resolved.showTimestamp && !bodyShown}
-				<span class="cool-toast-timestamp" data-cool-toast-timestamp data-slot="header"
-					>{stamp}</span
+	<!-- Caja de recorte: mide lo mismo que el path; fuera de "expanded" nada pinta fuera de ella -->
+	<div class="cool-toast-clip">
+		<div
+			bind:this={contentEl}
+			class={['cool-toast-content', classes.content]}
+			data-cool-toast-content
+		>
+			<div
+				bind:this={headerEl}
+				class={['cool-toast-header', classes.header]}
+				data-cool-toast-header
+			>
+				<span class={['cool-toast-icon', classes.icon]} data-cool-toast-icon>
+					{#if record.icon !== null}
+						{#key record.phase}
+							<span class="cool-toast-icon-glyph" in:iconSwap out:iconSwap>
+								{#if record.icon}
+									{@render record.icon()}
+								{:else}
+									<Icon phase={record.phase} />
+								{/if}
+							</span>
+						{/key}
+					{/if}
+				</span>
+				<span class={['cool-toast-title', classes.title]} data-cool-toast-title>{record.title}</span
 				>
-			{/if}
-		</div>
+				{#if resolved.showTimestamp && !bodyShown}
+					<span class="cool-toast-timestamp" data-cool-toast-timestamp data-slot="header"
+						>{stamp}</span
+					>
+				{/if}
+			</div>
 
-		{#if bodyShown}
-			<div class="cool-toast-body" out:fade={{ duration: fadeMs, easing: cubicOut }}>
-				{#if record.description}
-					{@const description = record.description}
-					<div class="cool-toast-description-row" data-cool-toast-description-row>
-						<div
-							class={['cool-toast-description', classes.description]}
-							data-cool-toast-description
-						>
-							{#if typeof description === 'string'}
-								{description}
-							{:else}
-								{@render description()}
+			{#if bodyShown}
+				<div
+					bind:this={bodyEl}
+					class="cool-toast-body"
+					out:fade={{ duration: fadeMs, easing: cubicOut }}
+					onoutroend={settlePill}
+				>
+					{#if record.description}
+						{@const description = record.description}
+						<div class="cool-toast-description-row" data-cool-toast-description-row>
+							<div
+								class={['cool-toast-description', classes.description]}
+								data-cool-toast-description
+							>
+								{#if typeof description === 'string'}
+									{description}
+								{:else}
+									{@render description()}
+								{/if}
+							</div>
+							{#if resolved.showTimestamp}
+								<span
+									class="cool-toast-timestamp"
+									data-cool-toast-timestamp
+									data-slot="description"
+								>
+									{stamp}
+								</span>
 							{/if}
 						</div>
-						{#if resolved.showTimestamp}
-							<span class="cool-toast-timestamp" data-cool-toast-timestamp data-slot="description">
+					{/if}
+
+					{#if record.action}
+						{#if resolved.showTimestamp && !record.description}
+							<span class="cool-toast-timestamp" data-cool-toast-timestamp data-slot="action">
 								{stamp}
 							</span>
 						{/if}
-					</div>
-				{/if}
-
-				{#if record.action}
-					{#if resolved.showTimestamp && !record.description}
-						<span class="cool-toast-timestamp" data-cool-toast-timestamp data-slot="action">
-							{stamp}
-						</span>
-					{/if}
-					<div
-						class={['cool-toast-action-wrapper', classes.actionWrapper]}
-						data-cool-toast-action-wrapper
-					>
-						<button
-							type="button"
-							class={['cool-toast-action', classes.actionButton]}
-							data-cool-toast-action
-							aria-label={record.action.label}
-							onclick={handleAction}
-						>
-							{record.action.label}
-						</button>
-					</div>
-				{/if}
-
-				{#if resolved.showProgress && view.state === 'expanded'}
-					{#key progressKey}
 						<div
-							class="cool-toast-progress"
-							data-cool-toast-progress
-							data-type={record.type}
-							data-paused={String(view.hovered)}
-							style:--cool-toast-progress-duration={`${displayMs}ms`}
+							class={['cool-toast-action-wrapper', classes.actionWrapper]}
+							data-cool-toast-action-wrapper
 						>
-							<div class="cool-toast-progress-bar"></div>
+							<button
+								type="button"
+								class={['cool-toast-action', classes.actionButton]}
+								data-cool-toast-action
+								aria-label={record.action.label}
+								onclick={handleAction}
+							>
+								{record.action.label}
+							</button>
 						</div>
-					{/key}
-				{/if}
-			</div>
-		{/if}
-	</div>
-</div>
+					{/if}
 
-{#if resolved.closeButton && !isLoading}
-	<button
-		type="button"
-		class="cool-toast-close"
-		data-cool-toast-close
-		data-side={resolved.closeButton}
-		aria-label={closeLabel}
-		onclick={() => dismissSelf(true)}
-	>
-		<svg
-			width="12"
-			height="12"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			aria-hidden="true"
+					{#if resolved.showProgress && view.state === 'expanded'}
+						{#key progressKey}
+							<div
+								class="cool-toast-progress"
+								data-cool-toast-progress
+								data-type={record.type}
+								data-paused={String(view.hovered)}
+								style:--cool-toast-progress-duration={`${displayMs}ms`}
+							>
+								<div class="cool-toast-progress-bar"></div>
+							</div>
+						{/key}
+					{/if}
+				</div>
+			{/if}
+		</div>
+	</div>
+
+	{#if resolved.closeButton && !isLoading}
+		<button
+			type="button"
+			class="cool-toast-close"
+			data-cool-toast-close
+			data-side={resolved.closeButton}
+			aria-label={closeLabel}
+			onclick={() => dismissSelf(true)}
 		>
-			<path d="M18 6 6 18" />
-			<path d="m6 6 12 12" />
-		</svg>
-	</button>
-{/if}
+			<svg
+				width="12"
+				height="12"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path d="M18 6 6 18" />
+				<path d="m6 6 12 12" />
+			</svg>
+		</button>
+	{/if}
+</div>

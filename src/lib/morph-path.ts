@@ -113,6 +113,21 @@ function morphPathCenterRaw(pw: number, bw: number, th: number, t: number): stri
 	].join(' ');
 }
 
+/**
+ * Caja que ocupa el path en `t` (igual para ambas variantes): la píldora mientras el path es
+ * píldora y, después, el ancho y el alto interpolados del cuerpo.
+ */
+export function morphBox(
+	pw: number,
+	bw: number,
+	th: number,
+	t: number
+): { width: number; height: number } {
+	const pillW = Math.min(pw, bw);
+	const { bodyH, isPill } = bodyGeometry(th, t);
+	return isPill ? { width: pillW, height: PH } : { width: pillW + (bw - pillW) * t, height: bodyH };
+}
+
 /** Path SVG del blob: píldora (t = 0) que se transforma en cuerpo completo (t = 1). */
 export const morphPath: PathFn = memoizePath(morphPathRaw);
 

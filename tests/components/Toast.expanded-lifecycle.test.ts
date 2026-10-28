@@ -7,10 +7,10 @@ import { advance, flush, hover, q, resetToastEnvironment, toastEl, toastIds } fr
 
 vi.mock('motion', async () => (await import('../mocks/motion')).motionMockFactory());
 
-// Medidas por defecto del stub de jsdom: pill 120 de ancho; contenido expandido 300×90
-const PW = 120;
-const BW = 300;
-const TH = 90;
+// Medidas por defecto del stub de jsdom: pill 136 de ancho (100 + 36); contenido expandido 320×112
+const PW = 136;
+const BW = 320;
+const TH = 112;
 const norm = (d: string | null) => (d ?? '').replace(/\s+/g, ' ').trim();
 
 const li = (id: string) => toastEl(id)!;
@@ -60,14 +60,16 @@ describe('expand timeline (ANIM-1 states)', () => {
 		expect(norm(pathD('t'))).toBe(norm(morphPath(PW, BW, TH, 1)));
 	});
 
-	it('clears the inline measurement styles when the morph completes', async () => {
+	it('leaves the body width and height inline on the wrapper when the morph completes', async () => {
 		render(Toaster);
 		expandedToast();
 		await advance(330);
 		expect(li('t')).toHaveAttribute('data-state', 'expanded');
 		const wrapper = q(li('t'), '.cool-toast-wrapper')!;
 		const content = q(li('t'), '[data-cool-toast-content]')!;
-		expect(wrapper.style.width).toBe('');
+		// B.8-delta: expanded → el wrapper mide exactamente bw
+		expect(wrapper.style.width).toBe(`${BW}px`);
+		expect(wrapper.style.height).toBe(`${TH}px`);
 		expect(content.style.maxHeight).toBe('');
 		expect(content.style.clipPath).toBe('');
 		expect(content.style.overflow).toBe('');

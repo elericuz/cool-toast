@@ -4,8 +4,9 @@ import * as constants from '../src/lib/constants';
 // Verificación estática de handoff §B.7
 describe('constants (handoff §B.7)', () => {
 	it('exposes the geometry constants', () => {
-		expect(constants.PILL_HEIGHT).toBe(34);
-		expect(constants.PILL_RADIUS).toBe(17);
+		expect(constants.PILL_HEIGHT).toBe(44);
+		expect(constants.PILL_RADIUS).toBe(22);
+		expect(constants.PILL_PADDING_X).toBe(36);
 		expect(constants.NECK_CURVE_MAX).toBe(14);
 		expect(constants.BODY_CORNER_MAX).toBe(16);
 		expect(constants.PILL_THRESHOLD).toBe(8);

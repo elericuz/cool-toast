@@ -125,12 +125,15 @@ if (typeof window !== 'undefined') {
 	// Medidas de layout (jsdom devuelve 0): atributos data-test-w/h o mapa por defecto
 	// ---------------------------------------------------------------------------
 	function defaultSize(el: HTMLElement): { w: number; h: number } {
-		if (el.matches('[data-cool-toast-header]')) return { w: 100, h: 34 };
+		if (el.matches('[data-cool-toast-header]')) return { w: 100, h: 20 };
 		if (el.matches('[data-cool-toast-content]')) {
-			const expanded = el.querySelector(
-				'[data-cool-toast-description-row], [data-cool-toast-action-wrapper]'
-			);
-			return expanded ? { w: 300, h: 90 } : { w: 120, h: 34 };
+			// Los nodos en salida ([data-leaving]) no cuentan como contenido expandido
+			const expanded = [
+				...el.querySelectorAll(
+					'[data-cool-toast-description-row], [data-cool-toast-action-wrapper]'
+				)
+			].some((node) => !node.closest('[data-leaving]'));
+			return expanded ? { w: 320, h: 112 } : { w: 150, h: 44 };
 		}
 		return { w: 0, h: 0 };
 	}

@@ -81,14 +81,14 @@ describe('pill resize on title change (ANIM-7)', () => {
 		await flush();
 		animateMock.setMode('manual');
 
-		setHeaderWidth(200); // pw = 200 + 20 de padding
+		setHeaderWidth(200); // pw = 200 + 36 de padding
 		toast.update('t', { title: 'Much longer title here' });
 		await flush();
 
 		const resize = callsWith((o) => o.duration === 0.5)[0];
 		expect(resize).toMatchObject({
-			from: 120,
-			to: 220,
+			from: 136,
+			to: 236,
 			options: { type: 'spring', duration: 0.5 }
 		});
 		expect((resize.options as { bounce: number }).bounce).toBeCloseTo(0.35, 10);
@@ -96,7 +96,7 @@ describe('pill resize on title change (ANIM-7)', () => {
 
 		animateMock.completeAll();
 		await flush();
-		expect(norm(pathD())).toBe(norm(morphPath(220, 220, 34, 0)));
+		expect(norm(pathD())).toBe(norm(morphPath(236, 236, 44, 0)));
 		expect(li()).toHaveAttribute('data-state', 'pill');
 	});
 
@@ -109,8 +109,8 @@ describe('pill resize on title change (ANIM-7)', () => {
 		toast.update('t', { title: 'Longer title' });
 		await flush();
 		expect(callsWith((o) => o.duration === 0.4 && Array.isArray(o.ease))[0]).toMatchObject({
-			from: 120,
-			to: 180,
+			from: 136,
+			to: 196,
 			options: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }
 		});
 	});
