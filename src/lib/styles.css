@@ -1,0 +1,522 @@
+/*
+ * Cool-Toast — hoja de estilos de la librería.
+ * Sin dependencias de frameworks: todo se personaliza con variables --cool-toast-* sobre
+ * [data-cool-toaster]. Valores por defecto derivados de goey-toast (ver NOTICE).
+ */
+
+/* ------------------------------------------------------------------ */
+/* Variables (tema claro por defecto)                                  */
+/* ------------------------------------------------------------------ */
+[data-cool-toaster] {
+	--cool-toast-font:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+	--cool-toast-fill: #ffffff;
+	--cool-toast-border-color: none;
+	--cool-toast-border-width: 1.5;
+	--cool-toast-shadow: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.06))
+		drop-shadow(0 1px 4px rgba(0, 0, 0, 0.04));
+	--cool-toast-description-color: #444444;
+	--cool-toast-timestamp-color: #999999;
+	--cool-toast-close-color: #555555;
+	--cool-toast-progress-track: rgba(0, 0, 0, 0.06);
+	--cool-toast-default-color: #555555;
+	--cool-toast-default-progress: #999999;
+	--cool-toast-default-action-bg: #e8e8e8;
+	--cool-toast-default-action-bg-hover: #dcdcdc;
+	--cool-toast-default-action-bg-active: #d0d0d0;
+	--cool-toast-success-color: #4caf50;
+	--cool-toast-success-action-bg: #c8e6c9;
+	--cool-toast-success-action-bg-hover: #a5d6a7;
+	--cool-toast-success-action-bg-active: #81c784;
+	--cool-toast-error-color: #e53935;
+	--cool-toast-error-action-bg: #ffcdd2;
+	--cool-toast-error-action-bg-hover: #ef9a9a;
+	--cool-toast-error-action-bg-active: #e57373;
+	--cool-toast-warning-color: #c49000;
+	--cool-toast-warning-action-bg: #ffecb3;
+	--cool-toast-warning-action-bg-hover: #ffe082;
+	--cool-toast-warning-action-bg-active: #ffd54f;
+	--cool-toast-info-color: #1e88e5;
+	--cool-toast-info-action-bg: #bbdefb;
+	--cool-toast-info-action-bg-hover: #90caf9;
+	--cool-toast-info-action-bg-active: #64b5f6;
+	--cool-toast-loading-color: #555555;
+
+	position: fixed;
+	z-index: 999999;
+	/* El contenedor no bloquea la página; solo los toasts reciben el puntero */
+	pointer-events: none;
+	font-family: var(--cool-toast-font);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Tema oscuro */
+[data-cool-toaster][data-theme="dark"] {
+	--cool-toast-fill: #1a1a1a;
+	--cool-toast-shadow: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))
+		drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+	--cool-toast-description-color: #e0e0e0;
+	--cool-toast-timestamp-color: #777777;
+	--cool-toast-close-color: #e0e0e0;
+	--cool-toast-progress-track: rgba(255, 255, 255, 0.1);
+	--cool-toast-default-color: #cccccc;
+	--cool-toast-default-progress: #888888;
+	--cool-toast-default-action-bg: #3a3a3a;
+	--cool-toast-default-action-bg-hover: #444444;
+	--cool-toast-default-action-bg-active: #4e4e4e;
+	--cool-toast-success-color: #66bb6a;
+	--cool-toast-success-action-bg: #1b5e20;
+	--cool-toast-success-action-bg-hover: #2e7d32;
+	--cool-toast-success-action-bg-active: #388e3c;
+	--cool-toast-error-color: #ef5350;
+	--cool-toast-error-action-bg: #b71c1c;
+	--cool-toast-error-action-bg-hover: #c62828;
+	--cool-toast-error-action-bg-active: #d32f2f;
+	--cool-toast-warning-color: #ffb300;
+	--cool-toast-warning-action-bg: #4a3800;
+	--cool-toast-warning-action-bg-hover: #5c4600;
+	--cool-toast-warning-action-bg-active: #6e5400;
+	--cool-toast-info-color: #42a5f5;
+	--cool-toast-info-action-bg: #0d47a1;
+	--cool-toast-info-action-bg-hover: #1565c0;
+	--cool-toast-info-action-bg-active: #1976d2;
+	--cool-toast-loading-color: #cccccc;
+}
+
+/* ------------------------------------------------------------------ */
+/* Posición del Toaster y pila (D6)                                    */
+/* ------------------------------------------------------------------ */
+[data-cool-toaster][data-y="top"] {
+	top: var(--cool-toast-offset);
+}
+
+[data-cool-toaster][data-y="bottom"] {
+	bottom: var(--cool-toast-offset);
+}
+
+[data-cool-toaster][data-side="left"] {
+	left: var(--cool-toast-offset);
+}
+
+[data-cool-toaster][data-side="right"] {
+	right: var(--cool-toast-offset);
+}
+
+[data-cool-toaster][data-side="center"] {
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+[data-cool-toast-list] {
+	display: flex;
+	flex-direction: column;
+	gap: var(--cool-toast-gap);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* Abajo, el más reciente (primero en el DOM) queda junto al borde */
+[data-cool-toaster][data-y="bottom"] [data-cool-toast-list] {
+	flex-direction: column-reverse;
+}
+
+[data-cool-toaster][data-side="left"] [data-cool-toast-list] {
+	align-items: flex-start;
+}
+
+[data-cool-toaster][data-side="center"] [data-cool-toast-list] {
+	align-items: center;
+}
+
+[data-cool-toaster][data-side="right"] [data-cool-toast-list] {
+	align-items: flex-end;
+}
+
+/* ------------------------------------------------------------------ */
+/* Toast                                                               */
+/* ------------------------------------------------------------------ */
+[data-cool-toast] {
+	position: relative;
+	box-sizing: border-box;
+	max-width: calc(100vw - 2 * var(--cool-toast-offset));
+	pointer-events: auto;
+	font-family: var(--cool-toast-font);
+	touch-action: pan-y;
+	/* Vuelta suave a su sitio cuando un deslizamiento no llega al umbral */
+	transition:
+		transform 350ms cubic-bezier(0.4, 0, 0.2, 1),
+		opacity 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-cool-toast][data-swiping="true"] {
+	cursor: grabbing;
+	user-select: none;
+}
+
+[data-cool-toast][data-side="right"] {
+	margin-left: auto;
+}
+
+[data-cool-toast][data-side="center"] {
+	margin: 0 auto;
+}
+
+.cool-toast-wrapper {
+	position: relative;
+	width: fit-content;
+}
+
+/* El blob se dibuja desde (0, 0) del wrapper; el path define su tamaño real */
+.cool-toast-blob {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1px;
+	height: 1px;
+	overflow: visible;
+	pointer-events: none;
+	filter: var(--cool-toast-shadow);
+}
+
+/* Relleno por defecto cuando el toast no define fillColor (los atributos var() no son fiables) */
+.cool-toast-blob path[fill^="var("] {
+	fill: var(--cool-toast-fill);
+}
+
+[data-cool-toast-content] {
+	position: relative;
+	box-sizing: border-box;
+	padding: 7px 10px;
+}
+
+[data-cool-toast][data-expanded="true"] [data-cool-toast-content] {
+	min-width: 300px;
+	max-width: 380px;
+	padding: 7px 10px 16px 10px;
+}
+
+/* Derecha: el blob se espeja y el contenido se des-espeja para leerse normal (D10) */
+[data-cool-toast][data-side="right"] .cool-toast-wrapper {
+	transform: scaleX(-1);
+}
+
+[data-cool-toast][data-side="right"] [data-cool-toast-content] {
+	transform: scaleX(-1);
+	text-align: right;
+}
+
+[data-cool-toast-header] {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: fit-content;
+	height: 20px;
+	white-space: nowrap;
+}
+
+[data-cool-toast][data-side="right"] [data-cool-toast-header] {
+	margin-left: auto;
+}
+
+[data-cool-toast][data-side="center"] [data-cool-toast-header] {
+	margin: 0 auto;
+}
+
+[data-cool-toast-icon] {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+}
+
+.cool-toast-icon-glyph {
+	display: inline-flex;
+}
+
+[data-cool-toast-title] {
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 20px;
+}
+
+[data-cool-toast-timestamp] {
+	color: var(--cool-toast-timestamp-color);
+	font-size: 11px;
+	font-weight: 400;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.cool-toast-body {
+	padding-top: 8px;
+}
+
+[data-cool-toast-description-row] {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+[data-cool-toast-description-row] [data-cool-toast-timestamp] {
+	padding-top: 2px;
+}
+
+[data-cool-toast-description] {
+	color: var(--cool-toast-description-color);
+	font-size: 13px;
+	line-height: 1.45;
+	overflow-wrap: anywhere;
+}
+
+[data-cool-toast-timestamp][data-slot="action"] {
+	display: block;
+}
+
+[data-cool-toast-action-wrapper] {
+	margin-top: 10px;
+}
+
+[data-cool-toast-action] {
+	width: 100%;
+	padding: 7px 12px;
+	border: 0;
+	border-radius: 999px;
+	font: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 150ms ease;
+}
+
+[data-cool-toast-action]:focus-visible,
+[data-cool-toast-close]:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Barra de progreso                                                   */
+/* ------------------------------------------------------------------ */
+[data-cool-toast-progress] {
+	margin-top: 10px;
+	overflow: hidden;
+	border-radius: 3px;
+	background: var(--cool-toast-progress-track);
+}
+
+@keyframes cool-toast-progress-shrink {
+	from {
+		transform: scaleX(1);
+	}
+	to {
+		transform: scaleX(0);
+	}
+}
+
+.cool-toast-progress-bar {
+	height: 3px;
+	transform-origin: left center;
+	animation: cool-toast-progress-shrink var(--cool-toast-progress-duration, 4000ms) linear forwards;
+}
+
+[data-paused="true"] .cool-toast-progress-bar {
+	animation-play-state: paused;
+}
+
+/* ------------------------------------------------------------------ */
+/* Botón de cerrar                                                     */
+/* ------------------------------------------------------------------ */
+[data-cool-toast-close] {
+	position: absolute;
+	top: -6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--cool-toast-fill);
+	color: var(--cool-toast-close-color);
+	filter: var(--cool-toast-shadow);
+	cursor: pointer;
+}
+
+[data-cool-toast-close][data-side="top-left"] {
+	left: -6px;
+}
+
+[data-cool-toast-close][data-side="top-right"] {
+	right: -6px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Colores por tipo (STYLE-6): título, icono, progreso y acción         */
+/* ------------------------------------------------------------------ */
+[data-type="default"] [data-cool-toast-title],
+[data-type="default"] [data-cool-toast-icon] {
+	color: var(--cool-toast-default-color);
+}
+
+[data-type="default"] .cool-toast-progress-bar {
+	background: var(--cool-toast-default-progress);
+}
+
+[data-type="default"] [data-cool-toast-action] {
+	color: var(--cool-toast-default-color);
+	background: var(--cool-toast-default-action-bg);
+}
+
+[data-type="default"] [data-cool-toast-action]:hover {
+	background: var(--cool-toast-default-action-bg-hover);
+}
+
+[data-type="default"] [data-cool-toast-action]:active {
+	background: var(--cool-toast-default-action-bg-active);
+}
+
+[data-type="success"] [data-cool-toast-title],
+[data-type="success"] [data-cool-toast-icon] {
+	color: var(--cool-toast-success-color);
+}
+
+[data-type="success"] .cool-toast-progress-bar {
+	background: var(--cool-toast-success-color);
+}
+
+[data-type="success"] [data-cool-toast-action] {
+	color: var(--cool-toast-success-color);
+	background: var(--cool-toast-success-action-bg);
+}
+
+[data-type="success"] [data-cool-toast-action]:hover {
+	background: var(--cool-toast-success-action-bg-hover);
+}
+
+[data-type="success"] [data-cool-toast-action]:active {
+	background: var(--cool-toast-success-action-bg-active);
+}
+
+[data-type="error"] [data-cool-toast-title],
+[data-type="error"] [data-cool-toast-icon] {
+	color: var(--cool-toast-error-color);
+}
+
+[data-type="error"] .cool-toast-progress-bar {
+	background: var(--cool-toast-error-color);
+}
+
+[data-type="error"] [data-cool-toast-action] {
+	color: var(--cool-toast-error-color);
+	background: var(--cool-toast-error-action-bg);
+}
+
+[data-type="error"] [data-cool-toast-action]:hover {
+	background: var(--cool-toast-error-action-bg-hover);
+}
+
+[data-type="error"] [data-cool-toast-action]:active {
+	background: var(--cool-toast-error-action-bg-active);
+}
+
+[data-type="warning"] [data-cool-toast-title],
+[data-type="warning"] [data-cool-toast-icon] {
+	color: var(--cool-toast-warning-color);
+}
+
+[data-type="warning"] .cool-toast-progress-bar {
+	background: var(--cool-toast-warning-color);
+}
+
+[data-type="warning"] [data-cool-toast-action] {
+	color: var(--cool-toast-warning-color);
+	background: var(--cool-toast-warning-action-bg);
+}
+
+[data-type="warning"] [data-cool-toast-action]:hover {
+	background: var(--cool-toast-warning-action-bg-hover);
+}
+
+[data-type="warning"] [data-cool-toast-action]:active {
+	background: var(--cool-toast-warning-action-bg-active);
+}
+
+[data-type="info"] [data-cool-toast-title],
+[data-type="info"] [data-cool-toast-icon] {
+	color: var(--cool-toast-info-color);
+}
+
+[data-type="info"] .cool-toast-progress-bar {
+	background: var(--cool-toast-info-color);
+}
+
+[data-type="info"] [data-cool-toast-action] {
+	color: var(--cool-toast-info-color);
+	background: var(--cool-toast-info-action-bg);
+}
+
+[data-type="info"] [data-cool-toast-action]:hover {
+	background: var(--cool-toast-info-action-bg-hover);
+}
+
+[data-type="info"] [data-cool-toast-action]:active {
+	background: var(--cool-toast-info-action-bg-active);
+}
+
+/* Fase de carga: color propio y los tonos de info para progreso y acción (paridad con goey) */
+[data-phase="loading"] [data-cool-toast-title],
+[data-phase="loading"] [data-cool-toast-icon] {
+	color: var(--cool-toast-loading-color);
+}
+
+[data-phase="loading"] .cool-toast-progress-bar {
+	background: var(--cool-toast-info-color);
+}
+
+[data-phase="loading"] [data-cool-toast-action] {
+	background: var(--cool-toast-info-action-bg);
+}
+
+/* ------------------------------------------------------------------ */
+/* Spinner                                                             */
+/* ------------------------------------------------------------------ */
+@keyframes cool-toast-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.cool-toast-spin {
+	animation: cool-toast-spin 1s linear infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Accesibilidad                                                       */
+/* ------------------------------------------------------------------ */
+
+/* Regiones aria-live: invisibles pero legibles por lectores de pantalla */
+.cool-toast-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Movimiento reducido: sin transiciones; la barra de progreso conserva su duración real */
+@media (prefers-reduced-motion: reduce) {
+	[data-cool-toast],
+	[data-cool-toast] *:not(.cool-toast-progress-bar) {
+		transition: none !important;
+		animation-duration: 0.01ms !important;
+	}
+}
