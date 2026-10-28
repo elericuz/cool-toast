@@ -2,7 +2,24 @@
 	"name": "@elericuz/cool-toast",
 	"version": "0.1.0",
 	"description": "Gooey, morphing toast notifications for Svelte 5.",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/elericuz/cool-toast.git"
+	},
+	"homepage": "https://github.com/elericuz/cool-toast#readme",
+	"bugs": {
+		"url": "https://github.com/elericuz/cool-toast/issues"
+	},
+	"author": "Eric Valera Miller",
 	"license": "MIT",
+	"keywords": [
+		"svelte",
+		"svelte5",
+		"toast",
+		"notifications",
+		"gooey",
+		"sonner"
+	],
 	"type": "module",
 	"svelte": "./dist/index.js",
 	"types": "./dist/index.d.ts",
@@ -15,7 +32,8 @@
 		"./styles.css": "./dist/styles.css"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"NOTICE"
 	],
 	"sideEffects": [
 		"**/*.css"

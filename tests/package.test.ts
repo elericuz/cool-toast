@@ -18,9 +18,17 @@ describe('package.json contract (STYLE-8)', () => {
 		expect(pkg.svelte).toBe('./dist/index.js');
 	});
 
-	it('publishes only dist', () => {
-		expect(pkg.files).toContain('dist');
-		expect(pkg.files).toEqual(['dist']);
+	it('publishes only dist and NOTICE', () => {
+		// NOTICE incluye la atribución de goey-toast
+		expect(pkg.files).toEqual(['dist', 'NOTICE']);
+	});
+
+	it('declares the registry metadata', () => {
+		expect(pkg.repository.url).toBe('git+https://github.com/elericuz/cool-toast.git');
+		expect(pkg.homepage).toBeTypeOf('string');
+		expect(pkg.homepage.length).toBeGreaterThan(0);
+		expect(pkg.author).toBe('Eric Valera Miller');
+		expect(pkg.keywords).toEqual(expect.arrayContaining(['svelte', 'toast']));
 	});
 
 	it('requires Svelte 5 as a peer and motion as the only runtime dependency', () => {
